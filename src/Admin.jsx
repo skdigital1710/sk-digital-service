@@ -5,41 +5,33 @@ import {
   CheckCircle2,
   ChevronDown,
   Edit3,
+  ExternalLink,
+  Eye,
   FileText,
   FolderOpen,
   LayoutDashboard,
   LogOut,
+  Menu,
+  Moon,
   MoreVertical,
   Plus,
   Search,
   ShieldCheck,
+  Sun,
   Trash2,
   UploadCloud,
   X,
+  Star,
+  Clock3,
+  Download,
 } from "lucide-react";
 import { supabase } from "./lib/supabase";
 
 const fallbackCategories = [
-  {
-    name: "Government Jobs",
-    slug: "government-jobs",
-    icon: "💼",
-  },
-  {
-    name: "SSC",
-    slug: "ssc",
-    icon: "📚",
-  },
-  {
-    name: "Study Material",
-    slug: "study-material",
-    icon: "📖",
-  },
-  {
-    name: "Government Forms",
-    slug: "government-forms",
-    icon: "📄",
-  },
+  { name: "Government Jobs", slug: "government-jobs", icon: "💼" },
+  { name: "SSC", slug: "ssc", icon: "📚" },
+  { name: "Study Material", slug: "study-material", icon: "📖" },
+  { name: "Government Forms", slug: "government-forms", icon: "📄" },
 ];
 
 const emptyForm = {
@@ -51,6 +43,7 @@ const emptyForm = {
   price: "",
   tags: "",
   isPublished: false,
+  isFeatured: false,
   file: null,
 };
 
@@ -70,14 +63,28 @@ function Admin() {
   const [activeSection, setActiveSection] = useState("dashboard");
   const [search, setSearch] = useState("");
   const [statusFilter, setStatusFilter] = useState("all");
+  const [categoryFilter, setCategoryFilter] = useState("all");
+
+  const [showSidebar, setShowSidebar] = useState(false);
+  const [darkMode, setDarkMode] = useState(
+    localStorage.getItem("sk_admin_theme") === "dark"
+  );
 
   const [showResourceModal, setShowResourceModal] = useState(false);
+  const [showDetailModal, setShowDetailModal] = useState(false);
+  const [selectedResource, setSelectedResource] = useState(null);
+
   const [editingResource, setEditingResource] = useState(null);
   const [form, setForm] = useState(emptyForm);
 
   const [saving, setSaving] = useState(false);
   const [message, setMessage] = useState("");
   const [error, setError] = useState("");
+
+  useEffect(() => {
+    document.body.classList.toggle("admin-dark", darkMode);
+    localStorage.setItem("sk_admin_theme", darkMode ? "dark" : "light");
+  }, [darkMode]);
 
   useEffect(() => {
     checkSession();
@@ -96,6 +103,13 @@ function Admin() {
       loadDashboard();
     }
   }, [session]);
+
+  useEffect(() => {
+    if (!message) return;
+
+    const timer = setTimeout(() => setMessage(""), 3500);
+    return () => clearTimeout(timer);
+  }, [message]);
 
   async function checkSession() {
     const { data } = await supabase.auth.getSession();
@@ -148,6 +162,8 @@ function Admin() {
 
     if (!resourcesResult.error) {
       setResources(resourcesResult.data || []);
+    } else {
+      setError(resourcesResult.error.message);
     }
 
     if (!categoriesResult.error && categoriesResult.data?.length) {
@@ -162,7 +178,10 @@ function Admin() {
       total: resources.length,
       published: resources.filter((item) => item.is_published).length,
       drafts: resources.filter((item) => !item.is_published).length,
+      featured: resources.filter((item) => item.is_featured).length,
       categories: categories.length,
+      free: resources.filter((item) => item.is_free).length,
+      paid: resources.filter((item) => !item.is_free).length,
     };
   }, [resources, categories]);
 
@@ -188,9 +207,13 @@ function Admin() {
         (statusFilter === "published" && resource.is_published) ||
         (statusFilter === "draft" && !resource.is_published);
 
-      return matchesSearch && matchesStatus;
+      const matchesCategory =
+        categoryFilter === "all" ||
+        resource.category === categoryFilter;
+
+      return matchesSearch && matchesStatus && matchesCategory;
     });
-  }, [resources, search, statusFilter]);
+  }, [resources, search, statusFilter, categoryFilter]);
 
   function openAddResource() {
     setEditingResource(null);
@@ -199,8 +222,8 @@ function Admin() {
       category: categories[0]?.name || "Government Jobs",
     });
     setError("");
-    setMessage("");
     setShowResourceModal(true);
+    setShowSidebar(false);
   }
 
   function openEditResource(resource) {
@@ -215,12 +238,18 @@ function Admin() {
       price: resource.price || "",
       tags: Array.isArray(resource.tags) ? resource.tags.join(", ") : "",
       isPublished: resource.is_published ?? false,
+      isFeatured: resource.is_featured ?? false,
       file: null,
     });
 
     setError("");
-    setMessage("");
     setShowResourceModal(true);
+    setShowSidebar(false);
+  }
+
+  function openDetails(resource) {
+    setSelectedResource(resource);
+    setShowDetailModal(true);
   }
 
   function closeResourceModal() {
@@ -263,12 +292,15 @@ function Admin() {
     try {
       let filePath = editingResource?.file_path || null;
 
-      /*
-       * File upload
-       *
-       * Bucket: resources
-       */
       if (form.file) {
+        if (form.file.type !== "application/pdf") {
+          throw new Error("Sirf PDF files allowed hain.");
+        }
+
+        if (form.file.size > 20 * 1024 * 1024) {
+          throw new Error("Maximum PDF size 20 MB hai.");
+        }
+
         const safeName = form.file.name
           .toLowerCase()
           .replace(/[^a-z0-9.]+/g, "-");
@@ -280,7 +312,7 @@ function Admin() {
           .upload(uniqueName, form.file, {
             cacheControl: "3600",
             upsert: false,
-            contentType: form.file.type || "application/pdf",
+            contentType: "application/pdf",
           });
 
         if (uploadError) {
@@ -317,6 +349,7 @@ function Admin() {
         is_free: form.isFree,
         price: form.isFree ? null : Number(form.price),
         is_published: form.isPublished,
+        is_featured: form.isFeatured,
         tags: form.tags
           .split(",")
           .map((tag) => tag.trim())
@@ -348,10 +381,7 @@ function Admin() {
       }
 
       await loadDashboard();
-
-      setTimeout(() => {
-        closeResourceModal();
-      }, 600);
+      closeResourceModal();
     } catch (saveError) {
       setError(saveError.message || "Something went wrong.");
     } finally {
@@ -361,7 +391,6 @@ function Admin() {
 
   async function togglePublished(resource) {
     setError("");
-    setMessage("");
 
     const { error: updateError } = await supabase
       .from("resources")
@@ -385,15 +414,37 @@ function Admin() {
     await loadDashboard();
   }
 
+  async function toggleFeatured(resource) {
+    const { error: updateError } = await supabase
+      .from("resources")
+      .update({
+        is_featured: !resource.is_featured,
+        updated_at: new Date().toISOString(),
+      })
+      .eq("id", resource.id);
+
+    if (updateError) {
+      setError(updateError.message);
+      return;
+    }
+
+    setMessage(
+      resource.is_featured
+        ? "Featured status removed."
+        : "Resource marked as featured."
+    );
+
+    await loadDashboard();
+  }
+
   async function deleteResource(resource) {
     const confirmed = window.confirm(
-      `Delete "${resource.title || "this resource"}"?`
+      `Delete "${resource.title || "this resource"}"?\n\nThis action cannot be undone.`
     );
 
     if (!confirmed) return;
 
     setError("");
-    setMessage("");
 
     if (resource.file_path) {
       await supabase.storage
@@ -415,6 +466,26 @@ function Admin() {
     await loadDashboard();
   }
 
+  async function previewFile(resource) {
+    if (!resource.file_path) {
+      setError("Is resource ke saath file available nahi hai.");
+      return;
+    }
+
+    const { data, error: signedError } = await supabase.storage
+      .from("resources")
+      .createSignedUrl(resource.file_path, 300);
+
+    if (signedError) {
+      setError(signedError.message);
+      return;
+    }
+
+    if (data?.signedUrl) {
+      window.open(data.signedUrl, "_blank", "noopener,noreferrer");
+    }
+  }
+
   if (loading) {
     return (
       <div className="admin-page">
@@ -432,7 +503,9 @@ function Admin() {
         <div className="admin-login-card">
           <div className="admin-brand-mark">SK</div>
 
-          <span className="admin-kicker">SK DIGITAL SERVICE</span>
+          <span className="admin-kicker">
+            SK DIGITAL SERVICE
+          </span>
 
           <h1>Admin Login</h1>
 
@@ -487,8 +560,19 @@ function Admin() {
   }
 
   return (
-    <div className="admin-app">
-      <aside className="admin-sidebar">
+    <div className={`admin-app ${darkMode ? "dark-theme" : ""}`}>
+      {showSidebar && (
+        <div
+          className="mobile-sidebar-overlay"
+          onClick={() => setShowSidebar(false)}
+        />
+      )}
+
+      <aside
+        className={`admin-sidebar ${
+          showSidebar ? "mobile-sidebar-open" : ""
+        }`}
+      >
         <div className="sidebar-brand">
           <div className="sidebar-logo">SK</div>
 
@@ -496,15 +580,27 @@ function Admin() {
             <strong>SK DIGITAL</strong>
             <span>SERVICE</span>
           </div>
+
+          <button
+            className="mobile-sidebar-close"
+            onClick={() => setShowSidebar(false)}
+          >
+            <X size={18} />
+          </button>
         </div>
 
-        <div className="sidebar-label">MANAGEMENT</div>
+        <div className="sidebar-label">
+          MANAGEMENT
+        </div>
 
         <button
           className={`sidebar-item ${
             activeSection === "dashboard" ? "active" : ""
           }`}
-          onClick={() => setActiveSection("dashboard")}
+          onClick={() => {
+            setActiveSection("dashboard");
+            setShowSidebar(false);
+          }}
         >
           <LayoutDashboard size={19} />
           Dashboard
@@ -514,7 +610,10 @@ function Admin() {
           className={`sidebar-item ${
             activeSection === "resources" ? "active" : ""
           }`}
-          onClick={() => setActiveSection("resources")}
+          onClick={() => {
+            setActiveSection("resources");
+            setShowSidebar(false);
+          }}
         >
           <FileText size={19} />
           Resources
@@ -528,12 +627,11 @@ function Admin() {
           Add Resource
         </button>
 
-        <div className="sidebar-label">SYSTEM</div>
+        <div className="sidebar-label">
+          SYSTEM
+        </div>
 
-        <a
-          href="/"
-          className="sidebar-item"
-        >
+        <a href="/" className="sidebar-item">
           <FolderOpen size={19} />
           Public Website
         </a>
@@ -549,8 +647,17 @@ function Admin() {
 
       <main className="admin-main">
         <header className="admin-topbar">
+          <div className="admin-mobile-menu">
+            <button onClick={() => setShowSidebar(true)}>
+              <Menu size={21} />
+            </button>
+          </div>
+
           <div>
-            <span className="admin-top-kicker">CONTROL CENTRE</span>
+            <span className="admin-top-kicker">
+              CONTROL CENTRE
+            </span>
+
             <h1>
               {activeSection === "resources"
                 ? "Resource Manager"
@@ -558,18 +665,36 @@ function Admin() {
             </h1>
           </div>
 
-          <button
-            className="admin-add-button"
-            onClick={openAddResource}
-          >
-            <Plus size={18} />
-            Add Resource
-          </button>
+          <div className="admin-top-actions">
+            <button
+              className="theme-toggle"
+              onClick={() => setDarkMode(!darkMode)}
+              title={
+                darkMode
+                  ? "Switch to Light Mode"
+                  : "Switch to Dark Mode"
+              }
+            >
+              {darkMode ? (
+                <Sun size={18} />
+              ) : (
+                <Moon size={18} />
+              )}
+            </button>
+
+            <button
+              className="admin-add-button"
+              onClick={openAddResource}
+            >
+              <Plus size={18} />
+              Add Resource
+            </button>
+          </div>
         </header>
 
         <div className="admin-content">
           {message && (
-            <div className="admin-success">
+            <div className="admin-success toast-notification">
               <CheckCircle2 size={18} />
               {message}
             </div>
@@ -578,6 +703,7 @@ function Admin() {
           {error && (
             <div className="admin-error admin-global-error">
               {error}
+
               <button onClick={() => setError("")}>
                 <X size={16} />
               </button>
@@ -609,7 +735,7 @@ function Admin() {
 
             <div className="admin-stat-card">
               <div className="stat-icon orange">
-                <Edit3 size={21} />
+                <Clock3 size={21} />
               </div>
 
               <div>
@@ -620,13 +746,33 @@ function Admin() {
 
             <div className="admin-stat-card">
               <div className="stat-icon purple">
-                <BookOpen size={21} />
+                <Star size={21} />
               </div>
 
               <div>
-                <span>Categories</span>
-                <strong>{stats.categories}</strong>
+                <span>Featured</span>
+                <strong>{stats.featured}</strong>
               </div>
+            </div>
+          </section>
+
+          <section className="admin-mini-stats">
+            <div>
+              <BookOpen size={17} />
+              <span>Categories</span>
+              <strong>{stats.categories}</strong>
+            </div>
+
+            <div>
+              <Download size={17} />
+              <span>Free Resources</span>
+              <strong>{stats.free}</strong>
+            </div>
+
+            <div>
+              <BarChart3 size={17} />
+              <span>Paid Resources</span>
+              <strong>{stats.paid}</strong>
             </div>
           </section>
 
@@ -636,7 +782,10 @@ function Admin() {
                 <span className="admin-panel-kicker">
                   RESOURCE LIBRARY
                 </span>
-                <h2>Manage Resources</h2>
+
+                <h2>
+                  Manage Resources
+                </h2>
               </div>
 
               <button
@@ -651,11 +800,14 @@ function Admin() {
             <div className="resource-toolbar">
               <div className="admin-search">
                 <Search size={18} />
+
                 <input
                   type="search"
                   placeholder="Search resources..."
                   value={search}
-                  onChange={(event) => setSearch(event.target.value)}
+                  onChange={(event) =>
+                    setSearch(event.target.value)
+                  }
                 />
               </div>
 
@@ -666,9 +818,41 @@ function Admin() {
                     setStatusFilter(event.target.value)
                   }
                 >
-                  <option value="all">All Resources</option>
-                  <option value="published">Published</option>
-                  <option value="draft">Drafts</option>
+                  <option value="all">
+                    All Resources
+                  </option>
+
+                  <option value="published">
+                    Published
+                  </option>
+
+                  <option value="draft">
+                    Drafts
+                  </option>
+                </select>
+
+                <ChevronDown size={16} />
+              </div>
+
+              <div className="filter-wrap">
+                <select
+                  value={categoryFilter}
+                  onChange={(event) =>
+                    setCategoryFilter(event.target.value)
+                  }
+                >
+                  <option value="all">
+                    All Categories
+                  </option>
+
+                  {categories.map((category) => (
+                    <option
+                      key={category.slug || category.id}
+                      value={category.name}
+                    >
+                      {category.name}
+                    </option>
+                  ))}
                 </select>
 
                 <ChevronDown size={16} />
@@ -686,7 +870,9 @@ function Admin() {
                   <FileText size={27} />
                 </div>
 
-                <h3>No resources yet</h3>
+                <h3>
+                  No resources yet
+                </h3>
 
                 <p>
                   Add your first PDF/resource and it will appear here.
@@ -710,7 +896,7 @@ function Admin() {
                       <th>TYPE</th>
                       <th>ACCESS</th>
                       <th>STATUS</th>
-                      <th />
+                      <th>ACTIONS</th>
                     </tr>
                   </thead>
 
@@ -734,6 +920,14 @@ function Admin() {
                                   "No description"}
                               </span>
                             </div>
+
+                            {resource.is_featured && (
+                              <Star
+                                size={15}
+                                className="featured-star"
+                                fill="currentColor"
+                              />
+                            )}
                           </div>
                         </td>
 
@@ -745,9 +939,8 @@ function Admin() {
 
                         <td>
                           <span className="type-badge">
-                            {(
-                              resource.resource_type || "pdf"
-                            ).toUpperCase()}
+                            {(resource.resource_type ||
+                              "pdf").toUpperCase()}
                           </span>
                         </td>
 
@@ -775,6 +968,7 @@ function Admin() {
                             }
                           >
                             <span />
+
                             {resource.is_published
                               ? "Published"
                               : "Draft"}
@@ -783,6 +977,45 @@ function Admin() {
 
                         <td>
                           <div className="table-actions">
+                            <button
+                              title="View Details"
+                              onClick={() =>
+                                openDetails(resource)
+                              }
+                            >
+                              <Eye size={16} />
+                            </button>
+
+                            <button
+                              title="Preview PDF"
+                              onClick={() =>
+                                previewFile(resource)
+                              }
+                            >
+                              <ExternalLink size={16} />
+                            </button>
+
+                            <button
+                              title="Feature"
+                              className={
+                                resource.is_featured
+                                  ? "featured-active"
+                                  : ""
+                              }
+                              onClick={() =>
+                                toggleFeatured(resource)
+                              }
+                            >
+                              <Star
+                                size={16}
+                                fill={
+                                  resource.is_featured
+                                    ? "currentColor"
+                                    : "none"
+                                }
+                              />
+                            </button>
+
                             <button
                               title="Edit"
                               onClick={() =>
@@ -822,7 +1055,10 @@ function Admin() {
             <ShieldCheck size={20} />
 
             <div>
-              <strong>Secure admin workspace</strong>
+              <strong>
+                Secure admin workspace
+              </strong>
+
               <span>
                 Resource management is protected through Supabase
                 Authentication and Row Level Security.
@@ -839,6 +1075,8 @@ function Admin() {
           </div>
         </div>
       </main>
+
+      {/* RESOURCE MODAL */}
 
       {showResourceModal && (
         <div className="modal-backdrop">
@@ -872,11 +1110,14 @@ function Admin() {
               onSubmit={handleSaveResource}
             >
               <div className="form-section">
-                <h3>Basic Information</h3>
+                <h3>
+                  Basic Information
+                </h3>
 
                 <div className="form-grid">
                   <label className="full">
                     Resource Title
+
                     <input
                       type="text"
                       placeholder="e.g. SSC CHSL 2026 GK Practice Set"
@@ -893,6 +1134,7 @@ function Admin() {
 
                   <label className="full">
                     Description
+
                     <textarea
                       placeholder="Short description of this resource..."
                       rows="4"
@@ -900,7 +1142,8 @@ function Admin() {
                       onChange={(event) =>
                         setForm({
                           ...form,
-                          description: event.target.value,
+                          description:
+                            event.target.value,
                         })
                       }
                     />
@@ -908,18 +1151,23 @@ function Admin() {
 
                   <label>
                     Category
+
                     <select
                       value={form.category}
                       onChange={(event) =>
                         setForm({
                           ...form,
-                          category: event.target.value,
+                          category:
+                            event.target.value,
                         })
                       }
                     >
                       {categories.map((category) => (
                         <option
-                          key={category.slug || category.id}
+                          key={
+                            category.slug ||
+                            category.id
+                          }
                           value={category.name}
                         >
                           {category.name}
@@ -930,25 +1178,37 @@ function Admin() {
 
                   <label>
                     Resource Type
+
                     <select
                       value={form.resourceType}
                       onChange={(event) =>
                         setForm({
                           ...form,
-                          resourceType: event.target.value,
+                          resourceType:
+                            event.target.value,
                         })
                       }
                     >
-                      <option value="pdf">PDF</option>
-                      <option value="document">Document</option>
-                      <option value="link">External Link</option>
+                      <option value="pdf">
+                        PDF
+                      </option>
+
+                      <option value="document">
+                        Document
+                      </option>
+
+                      <option value="link">
+                        External Link
+                      </option>
                     </select>
                   </label>
                 </div>
               </div>
 
               <div className="form-section">
-                <h3>File & Access</h3>
+                <h3>
+                  File & Access
+                </h3>
 
                 <label className="upload-box">
                   <input
@@ -957,7 +1217,9 @@ function Admin() {
                     onChange={(event) =>
                       setForm({
                         ...form,
-                        file: event.target.files?.[0] || null,
+                        file:
+                          event.target.files?.[0] ||
+                          null,
                       })
                     }
                   />
@@ -973,7 +1235,7 @@ function Admin() {
                   </strong>
 
                   <span>
-                    PDF files only • Secure storage
+                    PDF only • Maximum 20 MB • Secure Storage
                   </span>
                 </label>
 
@@ -994,9 +1256,15 @@ function Admin() {
                     }
                   >
                     <CheckCircle2 size={19} />
+
                     <div>
-                      <strong>Free Resource</strong>
-                      <span>Everyone can access</span>
+                      <strong>
+                        Free Resource
+                      </strong>
+
+                      <span>
+                        Everyone can access
+                      </span>
                     </div>
                   </button>
 
@@ -1014,10 +1282,18 @@ function Admin() {
                       })
                     }
                   >
-                    <span className="rupee-symbol">₹</span>
+                    <span className="rupee-symbol">
+                      ₹
+                    </span>
+
                     <div>
-                      <strong>Paid Resource</strong>
-                      <span>Payment required</span>
+                      <strong>
+                        Paid Resource
+                      </strong>
+
+                      <span>
+                        Payment required
+                      </span>
                     </div>
                   </button>
                 </div>
@@ -1025,6 +1301,7 @@ function Admin() {
                 {!form.isFree && (
                   <label>
                     Price
+
                     <input
                       type="number"
                       min="1"
@@ -1034,7 +1311,8 @@ function Admin() {
                       onChange={(event) =>
                         setForm({
                           ...form,
-                          price: event.target.value,
+                          price:
+                            event.target.value,
                         })
                       }
                     />
@@ -1043,11 +1321,14 @@ function Admin() {
               </div>
 
               <div className="form-section">
-                <h3>Discovery & Publishing</h3>
+                <h3>
+                  Discovery & Publishing
+                </h3>
 
                 <div className="form-grid">
                   <label className="full">
                     Tags
+
                     <input
                       type="text"
                       placeholder="SSC, CHSL, GK, 2026"
@@ -1055,7 +1336,8 @@ function Admin() {
                       onChange={(event) =>
                         setForm({
                           ...form,
-                          tags: event.target.value,
+                          tags:
+                            event.target.value,
                         })
                       }
                     />
@@ -1073,7 +1355,8 @@ function Admin() {
                     onChange={(event) =>
                       setForm({
                         ...form,
-                        isPublished: event.target.checked,
+                        isPublished:
+                          event.target.checked,
                       })
                     }
                   />
@@ -1088,6 +1371,33 @@ function Admin() {
                     <small>
                       Published resources public website par
                       automatically show honge.
+                    </small>
+                  </div>
+                </label>
+
+                <label className="publish-switch">
+                  <input
+                    type="checkbox"
+                    checked={form.isFeatured}
+                    onChange={(event) =>
+                      setForm({
+                        ...form,
+                        isFeatured:
+                          event.target.checked,
+                      })
+                    }
+                  />
+
+                  <span className="fake-switch featured-switch" />
+
+                  <div>
+                    <strong>
+                      Feature this resource
+                    </strong>
+
+                    <small>
+                      Featured resources ko public website par
+                      special placement diya ja sakta hai.
                     </small>
                   </div>
                 </label>
@@ -1122,6 +1432,151 @@ function Admin() {
                 </button>
               </div>
             </form>
+          </div>
+        </div>
+      )}
+
+      {/* DETAIL MODAL */}
+
+      {showDetailModal && selectedResource && (
+        <div className="modal-backdrop">
+          <div className="resource-detail-modal">
+            <div className="detail-cover">
+              <div className="detail-icon">
+                <FileText size={32} />
+              </div>
+
+              <button
+                className="modal-close detail-close"
+                onClick={() =>
+                  setShowDetailModal(false)
+                }
+              >
+                <X size={20} />
+              </button>
+            </div>
+
+            <div className="resource-detail-content">
+              <div className="detail-badges">
+                <span>
+                  {selectedResource.category}
+                </span>
+
+                {selectedResource.is_featured && (
+                  <span className="featured-badge">
+                    <Star size={12} fill="currentColor" />
+                    Featured
+                  </span>
+                )}
+
+                <span>
+                  {selectedResource.is_published
+                    ? "Published"
+                    : "Draft"}
+                </span>
+              </div>
+
+              <h2>
+                {selectedResource.title}
+              </h2>
+
+              <p className="detail-description">
+                {selectedResource.description ||
+                  "No description available."}
+              </p>
+
+              <div className="detail-info-grid">
+                <div>
+                  <small>
+                    RESOURCE TYPE
+                  </small>
+
+                  <strong>
+                    {(
+                      selectedResource.resource_type ||
+                      "pdf"
+                    ).toUpperCase()}
+                  </strong>
+                </div>
+
+                <div>
+                  <small>
+                    ACCESS
+                  </small>
+
+                  <strong>
+                    {selectedResource.is_free
+                      ? "FREE"
+                      : `₹${selectedResource.price}`}
+                  </strong>
+                </div>
+
+                <div>
+                  <small>
+                    CREATED
+                  </small>
+
+                  <strong>
+                    {selectedResource.created_at
+                      ? new Date(
+                          selectedResource.created_at
+                        ).toLocaleDateString("en-IN")
+                      : "—"}
+                  </strong>
+                </div>
+
+                <div>
+                  <small>
+                    FILE
+                  </small>
+
+                  <strong>
+                    {selectedResource.file_path
+                      ? "Available"
+                      : "Not uploaded"}
+                  </strong>
+                </div>
+              </div>
+
+              {selectedResource.tags?.length > 0 && (
+                <div className="detail-tags">
+                  {selectedResource.tags.map(
+                    (tag) => (
+                      <span key={tag}>
+                        #{tag}
+                      </span>
+                    )
+                  )}
+                </div>
+              )}
+
+              <div className="detail-actions">
+                <button
+                  className="admin-outline-button"
+                  onClick={() => {
+                    setShowDetailModal(false);
+                    openEditResource(
+                      selectedResource
+                    );
+                  }}
+                >
+                  <Edit3 size={17} />
+                  Edit
+                </button>
+
+                <button
+                  className="admin-primary-button"
+                  onClick={() =>
+                    previewFile(
+                      selectedResource
+                    )
+                  }
+                >
+                  <Eye size={17} />
+                  Preview Resource
+                </button>
+              </div>
+            </div>
           </div>
         </div>
       )}
