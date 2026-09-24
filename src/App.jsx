@@ -1,10 +1,10 @@
 import React, { useEffect, useMemo, useState } from "react";
 import {
-  ArrowRight, Bell, BookOpen, BriefcaseBusiness, CalendarDays, CheckCircle2, ChevronLeft,
-  ChevronRight, Clock3, Copy, CreditCard, ExternalLink, FileText, Fingerprint, Flame,
-  Globe2, GraduationCap, Grid3x3, IndianRupee, Info, Instagram, Landmark, Link2, MapPin,
-  Menu, MessageCircle, Moon, Search, Send, Share2, ShieldCheck, Sparkles, Star, Sun,
-  TrainFront, Users, WalletCards, X, Youtube, Zap
+  ArrowRight, Bell, BriefcaseBusiness, CalendarDays, CheckCircle2, ChevronLeft,
+  ChevronRight, Clock3, Copy, ExternalLink, FileText, Flame, Globe2, GraduationCap,
+  Grid3x3, IndianRupee, Info, Instagram, Landmark, Link2, MapPin, Menu, MessageCircle,
+  Moon, Search, Send, Share2, ShieldCheck, Sparkles, Star, Sun, TrainFront, Users,
+  WalletCards, X, Youtube, Zap
 } from "lucide-react";
 import { supabase } from "./lib/supabase";
 import "./App.css";
@@ -159,12 +159,17 @@ export default function App(){
         </div>
         <div className="hero-illustration">
           <div className="illus-glow"/>
-          <div className="illus-badge"><Globe2 size={40}/></div>
-          <div className="illus-laptop"><div className="illus-screen"/><div className="illus-base"/></div>
-          <div className="illus-card c1"><Fingerprint size={15}/><span>Aadhaar</span></div>
-          <div className="illus-card c2"><CreditCard size={15}/><span>PAN</span></div>
-          <div className="illus-card c3"><BookOpen size={15}/><span>Passport</span></div>
-          <div className="illus-card c4"><FileText size={15}/><span>Forms</span></div>
+          <div className="illus-laptop">
+            <div className="illus-screen">
+              <div className="dash-topbar"><span/><span/><span/></div>
+              <div className="dash-bars"><div style={{height:"38%"}}/><div style={{height:"68%"}}/><div style={{height:"52%"}}/><div style={{height:"88%"}}/><div style={{height:"60%"}}/><div style={{height:"78%"}}/></div>
+              <svg className="dash-graph" viewBox="0 0 100 30" preserveAspectRatio="none"><polyline points="0,25 16,17 32,20 48,9 64,13 80,5 100,8"/></svg>
+            </div>
+            <div className="illus-base"/>
+          </div>
+          <div className="glass-badge b1"><b>9+</b><span>Years</span></div>
+          <div className="glass-badge b2"><b>1000+</b><span>Customers</span></div>
+          <div className="glass-badge b3"><Star size={14}/><div><b>5★</b><span>Rated</span></div></div>
           <div className="illus-brandline"><Logo className="illus-logo"/><div><b>SK DIGITAL SERVICE</b><small>Dhule · Since 2015</small></div></div>
           <small className="illus-caption">Apply · Download · Get Done</small>
         </div>
