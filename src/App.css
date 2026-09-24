@@ -58,3 +58,35 @@
 .follow-btn.yt{background:linear-gradient(135deg,#ff4d4d,#c4302b)}
 .follow-tags{display:flex;flex-wrap:wrap;gap:6px;margin-top:4px}
 .follow-tags span{background:#f0f5fb;color:#6f85a0;font-size:8px;font-weight:800;border-radius:999px;padding:5px 9px;display:inline-block}
+.hero-illustration{min-height:300px;transform-style:preserve-3d}
+.illus-glow{width:260px;height:260px;background:radial-gradient(circle,rgba(255,209,91,.4),rgba(120,190,255,.15) 55%,transparent 72%);filter:blur(2px)}
+.illus-badge{width:74px;height:74px;background:radial-gradient(circle at 35% 30%,#1c4f95,#0a2c5c);border:2px solid rgba(255,255,255,.4);box-shadow:0 0 0 6px rgba(255,255,255,.06),0 20px 40px rgba(0,0,0,.35);animation:spinGlobe 14s linear infinite,bob0 5s ease-in-out infinite;color:#ffe08a}
+.illus-badge:before{content:"";position:absolute;inset:-11px;border-radius:50%;border:1.5px dashed rgba(255,255,255,.35);animation:spinRing 20s linear infinite}
+.illus-laptop{width:210px;margin-top:16px;transform:perspective(600px) rotateX(4deg)}
+.illus-screen{position:relative;height:104px;background:linear-gradient(165deg,#0f3068 0%,#124a9a 55%,#1c65c9 100%);border:4px solid #eef3fa;border-bottom:none;border-radius:12px 12px 0 0;box-shadow:inset 0 0 22px rgba(0,0,0,.35),0 25px 45px rgba(2,20,50,.5);overflow:hidden}
+.illus-screen:before{content:"";position:absolute;top:9px;left:10px;right:10px;height:6px;border-radius:3px;background:linear-gradient(90deg,rgba(255,255,255,.55),rgba(255,255,255,.15) 60%,transparent)}
+.illus-screen:after{content:"";position:absolute;top:22px;left:10px;width:64%;height:58px;border-radius:6px;background:
+  linear-gradient(rgba(255,255,255,.28) 0 6px,transparent 6px 12px) 0 0/100% 12px,
+  linear-gradient(rgba(255,209,91,.55) 0 6px,transparent 6px 12px) 0 16px/70% 12px,
+  linear-gradient(rgba(255,255,255,.2) 0 6px,transparent 6px 12px) 0 32px/85% 12px;
+  opacity:.85}
+.illus-base{position:relative;width:118%;margin-left:-9%;height:14px;background:linear-gradient(180deg,#e7edf6,#b9c7db);border-radius:0 0 10px 10px;box-shadow:0 10px 20px rgba(0,0,0,.35)}
+.illus-base:before{content:"";position:absolute;left:50%;top:3px;width:34px;height:5px;transform:translateX(-50%);background:#8fa2ba;border-radius:3px}
+.illus-card{border-radius:12px;padding:8px 12px;gap:7px;box-shadow:0 16px 30px rgba(2,20,50,.35),0 0 0 1px rgba(255,255,255,.5) inset;backdrop-filter:blur(2px)}
+.illus-card svg{width:17px;height:17px;padding:4px;border-radius:8px;box-sizing:content-box}
+.illus-card.c1{background:linear-gradient(135deg,#fff4e0,#ffe2b8);animation:bob1 4.5s ease-in-out infinite}
+.illus-card.c1 svg{background:#ff9d00;color:#fff}
+.illus-card.c2{background:linear-gradient(135deg,#e7f0ff,#cfe1ff);animation:bob2 5.2s ease-in-out infinite}
+.illus-card.c2 svg{background:#0b63d6;color:#fff}
+.illus-card.c3{background:linear-gradient(135deg,#e9f9ef,#c9f1d6);animation:bob3 4.8s ease-in-out infinite}
+.illus-card.c3 svg{background:#10a75b;color:#fff}
+.illus-card.c4{background:linear-gradient(135deg,#fff0f0,#ffd9d9);animation:bob4 5.6s ease-in-out infinite}
+.illus-card.c4 svg{background:#e5384a;color:#fff}
+.illus-brandline{box-shadow:0 12px 24px rgba(2,20,50,.3)}
+@keyframes spinGlobe{from{background-position:0 0}to{background-position:0 0}}
+@keyframes spinRing{from{transform:rotate(0)}to{transform:rotate(360deg)}}
+@keyframes bob0{0%,100%{transform:translateY(0) scale(1)}50%{transform:translateY(-7px) scale(1.03)}}
+@keyframes bob1{0%,100%{transform:translateY(0) rotate(-3deg)}50%{transform:translateY(-9px) rotate(-1deg)}}
+@keyframes bob2{0%,100%{transform:translateY(0) rotate(2deg)}50%{transform:translateY(-11px) rotate(4deg)}}
+@keyframes bob3{0%,100%{transform:translateY(0) rotate(-2deg)}50%{transform:translateY(-8px) rotate(-4deg)}}
+@keyframes bob4{0%,100%{transform:translateY(0) rotate(3deg)}50%{transform:translateY(-10px) rotate(1deg)}}
