@@ -100,7 +100,7 @@ function Admin() {
     if(r.error)setError(r.error.message); else setResources(r.data||[]);
     if(!c.error && c.data?.length)setCategories(c.data);
     if(!p.error)setPromotions(p.data||[]); else setError(p.error.message);
-    if(!s.error){const nextSettings=s.data||{};setSettings(nextSettings);setSiteForm(nextSettings);} else setError(s.error.message);
+    if(!s.error)setSettings(s.data||{}); else setError(s.error.message);
     setDataLoading(false);
   }
 
