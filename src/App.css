@@ -90,3 +90,28 @@
 @keyframes bob2{0%,100%{transform:translateY(0) rotate(2deg)}50%{transform:translateY(-11px) rotate(4deg)}}
 @keyframes bob3{0%,100%{transform:translateY(0) rotate(-2deg)}50%{transform:translateY(-8px) rotate(-4deg)}}
 @keyframes bob4{0%,100%{transform:translateY(0) rotate(3deg)}50%{transform:translateY(-10px) rotate(1deg)}}
+.illus-screen{position:relative;padding:10px 12px;overflow:hidden}
+.dash-topbar{display:flex;gap:5px;margin-bottom:9px}
+.dash-topbar span{width:6px;height:6px;border-radius:50%;background:rgba(255,255,255,.35)}
+.dash-topbar span:nth-child(1){background:#ff6161}
+.dash-topbar span:nth-child(2){background:#ffd15b}
+.dash-topbar span:nth-child(3){background:#5be08a}
+.dash-bars{position:relative;z-index:1;display:flex;align-items:flex-end;gap:6px;height:44px;margin-top:6px}
+.dash-bars div{flex:1;background:linear-gradient(180deg,#ffd15b,#ff9d00);border-radius:3px 3px 0 0;opacity:.92;animation:barGrow 2.4s ease-in-out infinite alternate}
+.dash-bars div:nth-child(2){animation-delay:.15s}
+.dash-bars div:nth-child(3){animation-delay:.3s}
+.dash-bars div:nth-child(4){animation-delay:.45s}
+.dash-bars div:nth-child(5){animation-delay:.6s}
+.dash-bars div:nth-child(6){animation-delay:.75s}
+.dash-graph{position:absolute;left:12px;right:12px;bottom:15px;height:26px;opacity:.85;z-index:2}
+.dash-graph polyline{fill:none;stroke:#8fd8ff;stroke-width:2;stroke-linecap:round;stroke-linejoin:round}
+@keyframes barGrow{from{transform:scaleY(.82)}to{transform:scaleY(1)}}
+
+.glass-badge{position:absolute;display:flex;flex-direction:column;align-items:center;gap:2px;background:rgba(255,255,255,.16);backdrop-filter:blur(14px);-webkit-backdrop-filter:blur(14px);border:1px solid rgba(255,255,255,.42);border-radius:14px;padding:9px 15px;color:#fff;box-shadow:0 14px 30px rgba(2,20,50,.32),0 0 0 1px rgba(255,255,255,.08) inset;z-index:3}
+.glass-badge b{font-size:15px;font-weight:950;line-height:1}
+.glass-badge span{font-size:8px;font-weight:800;letter-spacing:.05em;opacity:.92}
+.glass-badge.b1{left:-16px;top:16px;animation:bob1 4.5s ease-in-out infinite}
+.glass-badge.b2{right:-16px;top:40px;animation:bob2 5.2s ease-in-out infinite}
+.glass-badge.b3{right:8px;bottom:66px;flex-direction:row;align-items:center;gap:6px;animation:bob3 4.8s ease-in-out infinite}
+.glass-badge.b3 svg{color:#ffd15b}
+.glass-badge.b3 div{display:flex;flex-direction:column;align-items:flex-start;gap:1px}
