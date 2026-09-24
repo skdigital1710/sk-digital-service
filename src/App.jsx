@@ -1,17 +1,26 @@
 import React, { useEffect, useMemo, useState } from "react";
 import {
-  ArrowRight, Bell, BriefcaseBusiness, CalendarDays, CheckCircle2, ChevronLeft,
-  ChevronRight, Clock3, Copy, ExternalLink, FileText, Flame, Globe2, GraduationCap,
-  IndianRupee, Info, Link2, MapPin, Menu, MessageCircle, Search, Share2, ShieldCheck,
-  Sparkles, Star, Users, WalletCards, X, Zap
+  ArrowRight, Bell, BookOpen, BriefcaseBusiness, CalendarDays, CheckCircle2, ChevronLeft,
+  ChevronRight, Clock3, Copy, CreditCard, ExternalLink, FileText, Fingerprint, Flame,
+  Globe2, GraduationCap, Grid3x3, IndianRupee, Info, Instagram, Landmark, Link2, MapPin,
+  Menu, MessageCircle, Moon, Search, Send, Share2, ShieldCheck, Sparkles, Star, Sun,
+  TrainFront, Users, WalletCards, X, Youtube, Zap
 } from "lucide-react";
 import { supabase } from "./lib/supabase";
 import "./App.css";
 
 const WA_FALLBACK = "https://whatsapp.com/channel/0029Vb6H3cS1SWsyxdVo471w";
+const IG_FALLBACK = "https://instagram.com/skdigitalservice.dhule";
+const YT_FALLBACK = "https://youtube.com/@skdigitalservice-t9u";
 const JOB_CATS = [
-  ["Latest Jobs","latest"],["SSC","ssc"],["Railway","railway"],["Banking","banking"],
-  ["Defence","defence"],["Police","police"],["Teaching","teaching"],["Other","other"]
+  ["Latest Jobs","latest",Flame,"#ff7a00"],
+  ["SSC","ssc",GraduationCap,"#0b63d6"],
+  ["Railway","railway",TrainFront,"#0b63d6"],
+  ["Banking","banking",Landmark,"#0b3f7a"],
+  ["Defence","defence",ShieldCheck,"#e5384a"],
+  ["Police","police",Star,"#1c4fa8"],
+  ["Teaching","teaching",GraduationCap,"#0b8a57"],
+  ["Other","other",Grid3x3,"#5b6b82"]
 ];
 
 function safeUrl(v){ try { const u=new URL(String(v||"").trim()); return ["http:","https:"].includes(u.protocol)?u.toString():""; } catch{return "";} }
@@ -58,7 +67,7 @@ function Promotion({p,compact=false}){
   </div>;
 }
 
-function Header({search,setSearch,openMenu=false,onMenu}){
+function Header({search,setSearch,openMenu=false,onMenu,dark,onToggleTheme}){
   return <header className="site-header"><div className="shell header-inner">
     <a className="brand" href="/" onClick={e=>{if(location.pathname!=="/"){e.preventDefault();history.pushState({}, "", "/");window.dispatchEvent(new PopStateEvent("popstate"));}}}><Logo/><span>SK DIGITAL SERVICE<small>Government & Online Services</small></span></a>
     <nav className={openMenu?"nav open":"nav"}>
@@ -68,7 +77,12 @@ function Header({search,setSearch,openMenu=false,onMenu}){
       <a href="#resources">▣ <span>Resources</span></a>
       <a href="#about">● <span>About</span></a>
     </nav>
-    <div className="header-tools"><div className="head-search"><Search size={18}/><input value={search} onChange={e=>setSearch(e.target.value)} placeholder="Search jobs..."/></div><button className="mobile-menu" onClick={onMenu}><Menu size={21}/></button></div>
+    <div className="header-tools">
+      <div className="head-search"><Search size={18}/><input value={search} onChange={e=>setSearch(e.target.value)} placeholder="Search jobs, schemes, services..."/></div>
+      <button className="theme-toggle" onClick={onToggleTheme} aria-label="Toggle theme">{dark?<Sun size={17}/>:<Moon size={17}/>}</button>
+      <a className="header-cta" href="#latest" aria-label="Latest jobs"><ArrowRight size={17}/></a>
+      <button className="mobile-menu" onClick={onMenu}><Menu size={21}/></button>
+    </div>
   </div></header>;
 }
 
@@ -113,7 +127,9 @@ export default function App(){
   const [resources,setResources]=useState([]),[categories,setCategories]=useState([]),[promotions,setPromotions]=useState([]),[settings,setSettings]=useState(null);
   const [search,setSearch]=useState(""),[selectedCat,setSelectedCat]=useState("latest"),[mobileNav,setMobileNav]=useState(false),[route,setRoute]=useState(location.pathname);
   const [loading,setLoading]=useState(true);
+  const [dark,setDark]=useState(false);
 
+  useEffect(()=>{document.documentElement.setAttribute("data-theme",dark?"dark":"light");},[dark]);
   useEffect(()=>{const fn=()=>{setRoute(location.pathname);window.scrollTo({top:0,behavior:"smooth"});};window.addEventListener("popstate",fn);return()=>window.removeEventListener("popstate",fn)},[]);
   useEffect(()=>{(async()=>{setLoading(true);const [rr,cc,pp,ss]=await Promise.all([
     supabase.from("resources").select("*").eq("is_published",true).order("published_at",{ascending:false,nullsFirst:false}).order("created_at",{ascending:false}),
@@ -126,20 +142,61 @@ export default function App(){
   const nearest=useMemo(()=>gov.filter(r=>daysLeft(r.last_date)>=0).sort((a,b)=>(daysLeft(a.last_date)??9999)-(daysLeft(b.last_date)??9999))[0]||gov[0],[gov]);
   const filtered=useMemo(()=>{const q=search.trim().toLowerCase();let arr=[...gov];if(selectedCat!=="latest")arr=arr.filter(r=>jobCat(r)===selectedCat);if(q)arr=arr.filter(r=>[r.title,r.organization,r.post_name,r.qualification,r.job_category,r.category,...(r.tags||[])].filter(Boolean).join(" ").toLowerCase().includes(q));return arr.sort(publishedSort);},[gov,selectedCat,search]);
   const wa=safeUrl(settings?.whatsapp_channel_url)||WA_FALLBACK;
+  const ig=IG_FALLBACK, yt=YT_FALLBACK;
   const topPromos=promotions.filter(p=>p.placement==="top"), sidePromos=promotions.filter(p=>p.placement==="sidebar"), bottomPromos=promotions.filter(p=>p.placement==="bottom");
   const openJob=(r)=>{history.pushState({}, "", `/resource/${r.slug||r.id}`);setRoute(`/resource/${r.slug||r.id}`);window.scrollTo(0,0);};
 
   if(route.startsWith("/resource/")){const slug=decodeURIComponent(route.split("/resource/")[1]||"");const r=resources.find(x=>String(x.slug||x.id)===slug);if(r)return <JobDetail r={r} resources={resources} onBack={()=>{history.pushState({}, "", "/");setRoute("/");}} wa={wa}/>;}
   return <div className="public-site">
-    <Header search={search} setSearch={setSearch} openMenu={mobileNav} onMenu={()=>setMobileNav(v=>!v)}/>
+    <Header search={search} setSearch={setSearch} openMenu={mobileNav} onMenu={()=>setMobileNav(v=>!v)} dark={dark} onToggleTheme={()=>setDark(v=>!v)}/>
     <main>
-      <section className="hero-section"><div className="shell hero-grid"><div className="hero-copy"><span className="hero-badge"><Flame size={14}/> {settings?.hero_badge||"Latest Job Update"}</span><h1>{settings?.hero_title||"Your Dream Job"}<br/><mark>{settings?.hero_highlight||"Is Just a Click Away"}</mark></h1><p>{settings?.hero_description||"Government Jobs • Online Services • Useful Resources"}<br/>Everything You Need – In One Place</p><div className="trust-row"><span><ShieldCheck/> Trusted Information</span><span><Zap/> Fast & Easy Access</span><span><Sparkles/> 100% Genuine Updates</span></div></div><div className="hero-logo-wrap"><Logo/><span>Government & Online Services</span><small>Dhule&nbsp; | &nbsp;Since 2015</small></div><div>{nearest?<CountdownCard job={nearest} wa={wa}/>:<div className="countdown-card empty"><h3>Latest Government Jobs</h3><p>New verified updates will appear here.</p><a className="wa-hero" href={wa} target="_blank" rel="noreferrer"><MessageCircle/> <b>Join WhatsApp Channel</b><ArrowRight/></a></div>}</div></div></section>
+      <section className="hero-section"><div className="shell hero-grid">
+        <div className="hero-copy">
+          <span className="hero-badge"><Flame size={14}/> {settings?.hero_badge||"Latest Job Update"}</span>
+          <h1>{settings?.hero_title||"Your Dream Job"}<br/><mark>{settings?.hero_highlight||"Is Just a Click Away"}</mark></h1>
+          <p>{settings?.hero_description||"Government Jobs • Online Services • Useful Resources"}<br/>Everything You Need – In One Place</p>
+          <div className="trust-row"><span><Zap size={14}/> Fast & Easy Process</span><span><ShieldCheck size={14}/> Trusted Service</span><span><Sparkles size={14}/> 100% Genuine Updates</span></div>
+        </div>
+        <div className="hero-illustration">
+          <div className="illus-glow"/>
+          <div className="illus-badge"><Globe2 size={40}/></div>
+          <div className="illus-laptop"><div className="illus-screen"/><div className="illus-base"/></div>
+          <div className="illus-card c1"><Fingerprint size={15}/><span>Aadhaar</span></div>
+          <div className="illus-card c2"><CreditCard size={15}/><span>PAN</span></div>
+          <div className="illus-card c3"><BookOpen size={15}/><span>Passport</span></div>
+          <div className="illus-card c4"><FileText size={15}/><span>Forms</span></div>
+          <div className="illus-brandline"><Logo className="illus-logo"/><div><b>SK DIGITAL SERVICE</b><small>Dhule · Since 2015</small></div></div>
+          <small className="illus-caption">Apply · Download · Get Done</small>
+        </div>
+        <div>{nearest?<CountdownCard job={nearest} wa={wa}/>:<div className="countdown-card empty"><h3>Latest Government Jobs</h3><p>New verified updates will appear here.</p><a className="wa-hero" href={wa} target="_blank" rel="noreferrer"><MessageCircle/> <b>Join WhatsApp Channel</b><ArrowRight/></a></div>}</div>
+      </div></section>
       {topPromos.length>0&&<section className="shell promo-row">{topPromos.map(p=><Promotion p={p} key={p.id}/>)}</section>}
-      <section id="categories" className="shell category-row">{JOB_CATS.map(([name,slug],i)=><button key={slug} className={selectedCat===slug?"selected":""} onClick={()=>setSelectedCat(slug)}><span>{["🔥","🏛️","🚆","🏦","🛡️","🎖️","🎓","▦"][i]}</span><b>{name}</b></button>)}</section>
-      <section id="latest" className="shell content-layout"><div className="jobs-panel"><div className="panel-heading"><div><span>🔥 {selectedCat==="latest"?"Latest Jobs":"Government Jobs"}</span><h2>{selectedCat==="latest"?"Latest Jobs":JOB_CATS.find(x=>x[1]===selectedCat)?.[0]||"Jobs"}</h2><p>{selectedCat==="latest"?"Recently Published Jobs (Newest First)":"Latest published updates in this category"}</p></div><button onClick={()=>setSelectedCat("latest")}>View All <ArrowRight size={16}/></button></div>{loading?<div className="empty-state">Loading latest jobs…</div>:filtered.length?<div className="job-list">{filtered.slice(0,8).map(r=><JobCard key={r.id} r={r} onOpen={openJob}/>)}</div>:<div className="empty-state">No published jobs found.</div>}{filtered.length>8&&<button className="view-all-btn" onClick={()=>setSelectedCat(selectedCat)}>View All Jobs <ArrowRight/></button>}</div><aside className="side-panel"><div className="quick-links"><h3><Link2/> Quick Links</h3>{[["Apply Online","#latest"],["Download Notification","#latest"],["Official Website","#about"],["Syllabus & Exam Pattern","#resources"],["Previous Year Papers","#resources"],["Admit Card","#latest"],["Result","#latest"],["Important Documents","#resources"]].map(([x,u])=><a href={u} key={x}>{x}<ChevronRight size={15}/></a>)}</div>{sidePromos.map(p=><Promotion key={p.id} p={p} compact/>)}</aside></section>
+      <section id="categories" className="shell category-row">{JOB_CATS.map(([name,slug,Icon,color])=><button key={slug} className={selectedCat===slug?"selected":""} onClick={()=>setSelectedCat(slug)}><span style={{background:color+"1a",color}}><Icon size={24}/></span><b>{name}</b></button>)}</section>
+      <section id="latest" className="shell content-layout"><div className="jobs-panel"><div className="panel-heading"><div><span><Flame size={11}/> {selectedCat==="latest"?"Latest Jobs":"Government Jobs"}</span><h2>{selectedCat==="latest"?"Latest Jobs":JOB_CATS.find(x=>x[1]===selectedCat)?.[0]||"Jobs"}</h2><p>{selectedCat==="latest"?"Recently Published Jobs (Newest First)":"Latest published updates in this category"}</p></div><button onClick={()=>setSelectedCat("latest")}>View All <ArrowRight size={16}/></button></div>{loading?<div className="empty-state">Loading latest jobs…</div>:filtered.length?<div className="job-list">{filtered.slice(0,8).map(r=><JobCard key={r.id} r={r} onOpen={openJob}/>)}</div>:<div className="empty-state">No published jobs found.</div>}{filtered.length>8&&<button className="view-all-btn" onClick={()=>setSelectedCat(selectedCat)}>View All Jobs <ArrowRight/></button>}</div><aside className="side-panel">
+        <div className="quick-links"><h3><Link2 size={15}/> Quick Links</h3>{[["Apply Online","#latest"],["Download Notification","#latest"],["Official Website","#about"],["Syllabus & Exam Pattern","#resources"],["Previous Year Papers","#resources"],["Admit Card","#latest"],["Result","#latest"],["Important Documents","#resources"]].map(([x,u])=><a href={u} key={x}>{x}<ChevronRight size={15}/></a>)}</div>
+        <div className="follow-card">
+          <h3><Users size={14}/> Follow Us for Latest Updates</h3>
+          <a className="follow-btn insta" href={ig} target="_blank" rel="noreferrer"><Instagram size={18}/><span><b>Follow on Instagram</b><small>@skdigitalservice.dhule</small></span><ChevronRight size={15}/></a>
+          <a className="follow-btn yt" href={yt} target="_blank" rel="noreferrer"><Youtube size={18}/><span><b>Subscribe on YouTube</b><small>@skdigitalservice-t9u</small></span><ChevronRight size={15}/></a>
+          <div className="follow-tags"><span>Jobs</span><span>Schemes</span><span>Updates</span><span>Tips</span></div>
+        </div>
+        {sidePromos.map(p=><Promotion key={p.id} p={p} compact/>)}
+      </aside></section>
       <section id="about" className="shell why-strip"><div><ShieldCheck/><b>Why Choose SK Digital Service?</b></div><span><ShieldCheck/> Trusted & Reliable</span><span><Zap/> Fast Processing</span><span><Sparkles/> Expert Support</span><span><CheckCircle2/> All Government Services Under One Roof</span></section>
       {bottomPromos.length>0&&<section className="shell promo-bottom">{bottomPromos.map(p=><Promotion p={p} key={p.id}/>)}</section>}
     </main>
-    <footer id="resources" className="site-footer"><div className="shell footer-grid"><div><Logo/><p>Government & Online Services</p></div><div><b>Our Services</b><span>Government Job Updates</span><span>Online Application Services</span><span>Document Assistance</span><span>Digital & Design Services</span></div><div><b>Connect With Us</b><a href={wa} target="_blank" rel="noreferrer"><MessageCircle/> Join WhatsApp Channel</a><small>{wa}</small></div><div><b>Stay Informed</b><strong>Your Success<br/>Our Priority</strong></div></div><div className="copyright">© 2026 SK Digital Service. All Rights Reserved.</div></footer>
+    <footer id="resources" className="site-footer">
+      <div className="shell footer-grid">
+        <div><Logo/><p>Government & Online Services</p></div>
+        <div><b>Our Services</b><span>Government Job Updates</span><span>Online Application Services</span><span>Document Assistance</span><span>Digital & Design Services</span></div>
+        <div><b>Connect With Us</b><a href={wa} target="_blank" rel="noreferrer"><MessageCircle/> Join WhatsApp Channel</a><small>{wa}</small><div className="footer-social"><a href={ig} target="_blank" rel="noreferrer" aria-label="Instagram"><Instagram size={15}/></a><a href={yt} target="_blank" rel="noreferrer" aria-label="YouTube"><Youtube size={15}/></a><a href={wa} target="_blank" rel="noreferrer" aria-label="Channel"><Send size={15}/></a></div></div>
+        <div><b>Stay Informed</b><strong>Your Success<br/>Our Priority</strong></div>
+      </div>
+      <div className="copyright-row">
+        <span>© 2026 SK Digital Service. All Rights Reserved.</span>
+        <span className="footer-address"><MapPin size={12}/> Vadjai Road, Near Haji Chicken Center, Dhule</span>
+        <span>Built with ❤ for a Digital India</span>
+      </div>
+    </footer>
   </div>;
 }
