@@ -45,6 +45,8 @@ function publishedSort(a,b){
 }
 function Logo({className=""}){ return <img className={`sk-logo ${className}`} src="/sk-logo.png" alt="SK DIGITAL SERVICE"/>; }
 function Thumb({r,large=false}){
+  const orgLogo = safeUrl(r?.organization_logo_url);
+  if(orgLogo) return <img className={`thumb-image org-logo-image ${large?"large":""}`} src={orgLogo} alt={r?.organization||"Organization logo"} loading="lazy"/>;
   if(r?.thumbnail_url) return <img className={`thumb-image ${large?"large":""}`} src={r.thumbnail_url} alt="" loading="lazy"/>;
   return <div className={`thumb-fallback ${large?"large":""}`}><div className="tf-glow"/><b>SK</b><span>DIGITAL SERVICE</span><strong>{r?.organization||"Government Recruitment 2026"}</strong><em>{r?.title||"Latest Government Job"}</em><small>{r?.total_vacancies||"—"} Vacancies • Last Date {dateText(r?.last_date)}</small></div>;
 }
@@ -90,8 +92,21 @@ function JobCard({r,onOpen}){
   const d=deadline(r.last_date);
   return <button className="job-list-card" onClick={()=>onOpen(r)}>
     <div className="job-logo-wrap"><Thumb r={r}/></div>
-    <div className="job-main-copy"><div className="job-title-row"><h3>{r.title||"Government Job Recruitment"}</h3><span>{r.job_category||r.category||"Government Job"}</span></div><div className="job-meta"><span>◆ Vacancies: <b>{r.total_vacancies||"—"}</b></span><i/> <span>Qualification: <b>{r.qualification||"See Notification"}</b></span></div><div className="job-meta"><span>▣ Start: <b>{dateText(r.application_start_date)}</b></span><i/> <span>◷ Last Date: <b>{dateText(r.last_date)}</b></span></div></div>
-    <div className="job-card-action"><span className={`days-pill ${d.tone}`}><Clock3 size={13}/> {d.text}</span><span className="apply-mini">Apply Now <ArrowRight size={15}/></span></div>
+    <div className="job-main-copy">
+      <div className="job-title-row">
+        <h3>{r.title||"Government Job Recruitment"}</h3>
+        <span>{r.job_category||r.category||"Government Job"}</span>
+      </div>
+      <div className="job-stats">
+        <div className="job-stat-box"><small>VACANCY</small><b>{r.total_vacancies||"—"}</b></div>
+        <div className="job-stat-box"><small>QUALIFICATION</small><b>{r.qualification||"See Notification"}</b></div>
+        <div className="job-stat-box"><small>LAST DATE</small><b>{dateText(r.last_date)}</b></div>
+      </div>
+    </div>
+    <div className="job-card-action">
+      <span className={`days-pill ${d.tone}`}><Clock3 size={13}/> {d.text}</span>
+      <span className="apply-mini">Apply Now <ArrowRight size={15}/></span>
+    </div>
   </button>;
 }
 
@@ -142,7 +157,7 @@ export default function App(){
   const nearest=useMemo(()=>gov.filter(r=>daysLeft(r.last_date)>=0).sort((a,b)=>(daysLeft(a.last_date)??9999)-(daysLeft(b.last_date)??9999))[0]||gov[0],[gov]);
   const filtered=useMemo(()=>{const q=search.trim().toLowerCase();let arr=[...gov];if(selectedCat!=="latest")arr=arr.filter(r=>jobCat(r)===selectedCat);if(q)arr=arr.filter(r=>[r.title,r.organization,r.post_name,r.qualification,r.job_category,r.category,...(r.tags||[])].filter(Boolean).join(" ").toLowerCase().includes(q));return arr.sort(publishedSort);},[gov,selectedCat,search]);
   const wa=safeUrl(settings?.whatsapp_channel_url)||WA_FALLBACK;
-  const ig=IG_FALLBACK, yt=YT_FALLBACK;
+  const ig=safeUrl(settings?.instagram_url)||IG_FALLBACK, yt=safeUrl(settings?.youtube_url)||YT_FALLBACK;
   const topPromos=promotions.filter(p=>p.placement==="top"), sidePromos=promotions.filter(p=>p.placement==="sidebar"), bottomPromos=promotions.filter(p=>p.placement==="bottom");
   const openJob=(r)=>{history.pushState({}, "", `/resource/${r.slug||r.id}`);setRoute(`/resource/${r.slug||r.id}`);window.scrollTo(0,0);};
 
