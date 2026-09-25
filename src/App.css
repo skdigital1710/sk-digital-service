@@ -439,3 +439,22 @@ img{max-width:100%;display:block}
 }
 [data-theme="dark"] .job-stat-box small{color:#8ea8c1}
 [data-theme="dark"] .job-stat-box b{color:#e1efff}
+
+/* Organization logo in the job-detail hero: show nothing when Admin did not upload one. */
+.detail-hero .gov-mark:has(img){
+  background:rgba(255,255,255,.96);
+  border-color:rgba(255,255,255,.7);
+  padding:8px;
+}
+.detail-hero .gov-mark img{
+  width:100%;
+  height:100%;
+  object-fit:contain;
+  border-radius:9px;
+}
+.detail-hero .gov-mark:not(:has(img)){
+  display:none;
+}
+.detail-hero:has(.gov-mark:not(:has(img))) {
+  grid-template-columns: 1fr 230px;
+}
