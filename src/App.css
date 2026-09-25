@@ -372,3 +372,70 @@ img{max-width:100%;display:block}
   .detail-hero{grid-template-columns:1fr}.gov-mark{display:none}.detail-hero h1{font-size:20px}
   .stat-grid{grid-template-columns:1fr 1fr}.elig-grid{grid-template-columns:1fr}.related-grid{grid-template-columns:1fr}
 }
+
+
+/* JOB CARD — premium 3-stat information boxes */
+.job-stats{
+  display:grid;
+  grid-template-columns:repeat(3,minmax(0,1fr));
+  gap:7px;
+  margin-top:10px;
+}
+.job-stat-box{
+  min-width:0;
+  min-height:48px;
+  padding:7px 8px;
+  border:1px solid #dce9f7;
+  border-radius:10px;
+  background:linear-gradient(145deg,rgba(248,252,255,.98),rgba(237,246,255,.92));
+  box-shadow:0 5px 14px rgba(24,76,132,.06), inset 0 1px 0 rgba(255,255,255,.9);
+  display:flex;
+  flex-direction:column;
+  justify-content:center;
+  overflow:hidden;
+}
+.job-stat-box small{
+  display:block;
+  font-size:6px;
+  line-height:1.1;
+  letter-spacing:.55px;
+  font-weight:800;
+  color:#7690aa;
+  white-space:nowrap;
+}
+.job-stat-box b{
+  display:block;
+  margin-top:4px;
+  font-size:8px;
+  line-height:1.25;
+  color:#123f73;
+  white-space:nowrap;
+  overflow:hidden;
+  text-overflow:ellipsis;
+}
+.org-logo-image{
+  object-fit:contain !important;
+  background:#fff;
+  padding:10px;
+  border:1px solid #dce7f3;
+}
+
+@media(max-width:800px){
+  .job-stats{grid-template-columns:repeat(3,minmax(0,1fr));gap:5px}
+  .job-stat-box{padding:6px;min-height:45px}
+  .job-stat-box small{font-size:5.5px}
+  .job-stat-box b{font-size:7.5px}
+}
+@media(max-width:520px){
+  .job-stats{gap:4px}
+  .job-stat-box{min-height:43px;padding:5px}
+  .job-stat-box small{font-size:5px;letter-spacing:.35px}
+  .job-stat-box b{font-size:7px}
+}
+[data-theme="dark"] .job-stat-box{
+  background:linear-gradient(145deg,#122b45,#0e253c);
+  border-color:#28455f;
+  box-shadow:inset 0 1px 0 rgba(255,255,255,.04);
+}
+[data-theme="dark"] .job-stat-box small{color:#8ea8c1}
+[data-theme="dark"] .job-stat-box b{color:#e1efff}
