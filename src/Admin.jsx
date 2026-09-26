@@ -1,5 +1,6 @@
 import React, { useEffect, useMemo, useState } from "react";
 import "./Admin.css";
+import "./PublicSiteSettings.css";
 import {
   BarChart3, Bell, CheckCircle2, Edit3, ExternalLink, Eye, FileText,
   FolderOpen, Image as ImageIcon, LayoutDashboard, Link as LinkIcon,
@@ -15,6 +16,28 @@ const fallbackCategories = [
   { name: "Study Material", slug: "study-material", icon: "📖" },
   { name: "Government Forms", slug: "government-forms", icon: "📄" },
 ];
+
+const DEFAULT_SITE_SETTINGS = {
+  id: 1,
+  brand_name: "SK DIGITAL SERVICE",
+  tagline: "Government & Online Services",
+  hero_badge: "Latest Job Update",
+  hero_title: "Your Dream Job",
+  hero_highlight: "Is Just a Click Away",
+  hero_description: "Government Jobs • Online Services • Useful Resources",
+  whatsapp_channel_url: "https://whatsapp.com/channel/0029Vb6H3cS1SWsyxdVo471w",
+  whatsapp_cta_text: "Join WhatsApp Channel",
+  instagram_url: "https://www.instagram.com/skdigitalservice.dhule/",
+  youtube_url: "https://youtube.com/@skdigitalservice-t9u",
+  instagram_cta_text: "Follow on Instagram",
+  youtube_cta_text: "Subscribe on YouTube",
+  show_hero: true,
+  show_categories: true,
+  show_latest_jobs: true,
+  show_promotions: true,
+  show_whatsapp_cta: true,
+  show_social_cta: true,
+};
 
 const emptyForm = {
   title: "", shortDescription: "", fullDescription: "", category: "Government Jobs", jobCategory: "Other",
@@ -100,7 +123,15 @@ function Admin() {
     if(r.error)setError(r.error.message); else setResources(r.data||[]);
     if(!c.error && c.data?.length)setCategories(c.data);
     if(!p.error)setPromotions(p.data||[]); else setError(p.error.message);
-    if(!s.error)setSettings(s.data||{}); else setError(s.error.message);
+    if(!s.error){
+      const nextSettings={...DEFAULT_SITE_SETTINGS,...(s.data||{})};
+      setSettings(nextSettings);
+      setSiteForm(nextSettings);
+    } else {
+      setError(s.error.message);
+      setSettings(DEFAULT_SITE_SETTINGS);
+      setSiteForm(DEFAULT_SITE_SETTINGS);
+    }
     setDataLoading(false);
   }
 
@@ -178,7 +209,67 @@ function Admin() {
         {activeSection==='dashboard'&&<><div className="welcome"><div><span>SK DIGITAL SERVICE</span><h2>Control your public job portal from one place.</h2><p>Jobs, promotions, WhatsApp CTA and public-page content are connected to Supabase.</p></div><button onClick={()=>setActiveSection('resources')}><Sparkles/> Manage Jobs</button></div><div className="stats-grid">{[[stats.total,'Total Jobs',FileText],[stats.published,'Published',CheckCircle2],[stats.drafts,'Drafts',Clock3],[stats.featured,'Featured',Star],[stats.promotions,'Active Ads',Megaphone]].map(([n,l,I])=><div className="stat-card" key={l}><I/><strong>{n}</strong><span>{l}</span></div>)}</div><div className="dashboard-grid"><section className="panel"><div className="panel-head"><div><span>RECENT JOBS</span><h3>Latest updates</h3></div><button onClick={()=>setActiveSection('resources')}>View all <ExternalLink size={15}/></button></div>{resources.slice(0,6).map(r=><div className="mini-row" key={r.id}><div className="mini-icon">{r.is_published?<CheckCircle2/>:<Clock3/>}</div><div><strong>{r.title||'Untitled'}</strong><small>{r.organization||r.category||'Resource'} • {r.is_published?'Published':'Draft'}</small></div><button onClick={()=>openEditResource(r)}><Edit3/></button></div>)}</section><section className="panel"><div className="panel-head"><div><span>PROMOTIONS</span><h3>Public advertisements</h3></div><button onClick={()=>setActiveSection('promotions')}>Manage <ExternalLink size={15}/></button></div>{promotions.slice(0,5).map(p=><div className="mini-row" key={p.id}><div className="promo-dot"><Megaphone/></div><div><strong>{p.title}</strong><small>{p.placement} • {p.is_active?'Active':'Hidden'}</small></div><button onClick={()=>openEditPromotion(p)}><Edit3/></button></div>)}</section></div></>}
         {activeSection==='resources'&&<section className="panel large"><div className="panel-head"><div><span>CONTENT MANAGER</span><h3>Jobs & Resources</h3></div><div className="filters"><div className="search"><Search/><input placeholder="Search jobs..." value={search} onChange={e=>setSearch(e.target.value)}/></div><select value={statusFilter} onChange={e=>setStatusFilter(e.target.value)}><option value="all">All</option><option value="published">Published</option><option value="draft">Draft</option></select></div></div><div className="table-wrap"><table><thead><tr><th>Job</th><th>Category</th><th>Status</th><th>Deadline</th><th>Actions</th></tr></thead><tbody>{filtered.map(r=><tr key={r.id}><td><strong>{r.title||'Untitled'}</strong><small>{r.organization||r.post_name||'—'}</small></td><td>{r.job_category||r.category||'—'}</td><td><span className={`badge ${r.is_published?'green':'gray'}`}>{r.is_published?'Published':'Draft'}</span>{r.is_featured&&<span className="badge gold"><Star size={12}/> Featured</span>}</td><td>{r.last_date||'—'}</td><td><div className="row-actions"><button title="Preview PDF" onClick={()=>previewFile(r)}><Eye/></button><button title="Edit" onClick={()=>openEditResource(r)}><Edit3/></button><button title={r.is_published?'Unpublish':'Publish'} onClick={()=>togglePublish(r)}>{r.is_published?<Clock3/>:<CheckCircle2/>}</button><button title="Delete" className="danger" onClick={()=>deleteResource(r)}><Trash2/></button></div></td></tr>)}</tbody></table></div></section>}
         {activeSection==='promotions'&&<section className="panel large"><div className="panel-head"><div><span>MONETIZATION & PROMOTION</span><h3>Public Ads & Banners</h3><p>Add offers, service promotions, affiliate banners or announcements. Public page updates automatically.</p></div><button className="admin-add-button" onClick={openAddPromotion}><Plus/> Add Promotion</button></div><div className="promo-grid">{promotions.map(p=><div className={`promo-card ${!p.is_active?'muted':''}`} key={p.id}>{p.image_url?<img src={p.image_url} alt=""/>:<div className="promo-placeholder"><Megaphone/></div>}<div className="promo-body"><span className="badge blue">{p.placement}</span><h3>{p.title}</h3><p>{p.subtitle||p.description||'No description'}</p><div className="promo-actions"><button onClick={()=>togglePromotion(p)}>{p.is_active?'Hide':'Show'}</button><button onClick={()=>openEditPromotion(p)}><Edit3/> Edit</button><button className="danger" onClick={()=>deletePromotion(p)}><Trash2/></button></div></div></div>)}</div></section>}
-        {activeSection==='settings'&&siteForm&&<section className="panel large"><div className="panel-head"><div><span>PUBLIC WEBSITE</span><h3>Site Settings</h3><p>Control the public page without touching code.</p></div><button className="admin-add-button" onClick={saveSettings} disabled={saving}><Save/> {saving?'Saving...':'Save Settings'}</button></div><form className="settings-form" onSubmit={saveSettings}><div className="settings-card"><h3>Brand & WhatsApp</h3><label>Brand Name<input value={siteForm.brand_name||''} onChange={e=>setSiteForm({...siteForm,brand_name:e.target.value})}/></label><label>Tagline<input value={siteForm.tagline||''} onChange={e=>setSiteForm({...siteForm,tagline:e.target.value})}/></label><label>WhatsApp Channel URL<input value={siteForm.whatsapp_channel_url||''} onChange={e=>setSiteForm({...siteForm,whatsapp_channel_url:e.target.value})}/></label><label>WhatsApp CTA Text<input value={siteForm.whatsapp_cta_text||''} onChange={e=>setSiteForm({...siteForm,whatsapp_cta_text:e.target.value})}/></label></div><div className="settings-card"><h3>Hero Content</h3><label>Badge<input value={siteForm.hero_badge||''} onChange={e=>setSiteForm({...siteForm,hero_badge:e.target.value})}/></label><label>Hero Title<input value={siteForm.hero_title||''} onChange={e=>setSiteForm({...siteForm,hero_title:e.target.value})}/></label><label>Highlighted Text<input value={siteForm.hero_highlight||''} onChange={e=>setSiteForm({...siteForm,hero_highlight:e.target.value})}/></label><label>Hero Description<textarea value={siteForm.hero_description||''} onChange={e=>setSiteForm({...siteForm,hero_description:e.target.value})}/></label></div><div className="settings-card"><h3>Sections</h3>{[['show_hero','Hero'],['show_categories','Categories'],['show_latest_jobs','Latest Jobs'],['show_promotions','Promotions'],['show_whatsapp_cta','WhatsApp CTA']].map(([key,label])=><label className="check-row" key={key}><input type="checkbox" checked={!!siteForm[key]} onChange={e=>setSiteForm({...siteForm,[key]:e.target.checked})}/><span>{label}</span></label>)}</div></form></section>}
+        {activeSection==='settings'&&siteForm&&<section className="panel large settings-panel">
+          <div className="settings-hero">
+            <div>
+              <span>PUBLIC WEBSITE CONTROL</span>
+              <h2>Public Site Settings</h2>
+              <p>Yahan se public website ka content, social links aur visible sections control karo — code edit karne ki zarurat nahi.</p>
+            </div>
+            <button className="admin-add-button settings-save-top" onClick={saveSettings} disabled={saving}><Save/> {saving?'Saving...':'Save Settings'}</button>
+          </div>
+
+          <form className="settings-form settings-grid" onSubmit={saveSettings}>
+            <div className="settings-card settings-card-wide">
+              <div className="settings-card-title"><div className="settings-icon">SK</div><div><h3>Brand Identity</h3><p>Header aur website branding.</p></div></div>
+              <div className="settings-fields two-col">
+                <label>Brand Name<input value={siteForm.brand_name||''} onChange={e=>setSiteForm({...siteForm,brand_name:e.target.value})} placeholder="SK DIGITAL SERVICE"/></label>
+                <label>Tagline<input value={siteForm.tagline||''} onChange={e=>setSiteForm({...siteForm,tagline:e.target.value})} placeholder="Government & Online Services"/></label>
+              </div>
+            </div>
+
+            <div className="settings-card">
+              <div className="settings-card-title"><div className="settings-icon blue">W</div><div><h3>WhatsApp</h3><p>Channel CTA settings.</p></div></div>
+              <label>WhatsApp Channel URL<input type="url" value={siteForm.whatsapp_channel_url||''} onChange={e=>setSiteForm({...siteForm,whatsapp_channel_url:e.target.value})} placeholder="https://whatsapp.com/channel/..."/></label>
+              <label>CTA Text<input value={siteForm.whatsapp_cta_text||''} onChange={e=>setSiteForm({...siteForm,whatsapp_cta_text:e.target.value})} placeholder="Join WhatsApp Channel"/></label>
+            </div>
+
+            <div className="settings-card">
+              <div className="settings-card-title"><div className="settings-icon pink">◎</div><div><h3>Instagram</h3><p>Public Instagram profile.</p></div></div>
+              <label>Instagram URL<input type="url" value={siteForm.instagram_url||''} onChange={e=>setSiteForm({...siteForm,instagram_url:e.target.value})} placeholder="https://www.instagram.com/..."/></label>
+              <label>Button Text<input value={siteForm.instagram_cta_text||''} onChange={e=>setSiteForm({...siteForm,instagram_cta_text:e.target.value})} placeholder="Follow on Instagram"/></label>
+            </div>
+
+            <div className="settings-card">
+              <div className="settings-card-title"><div className="settings-icon red">▶</div><div><h3>YouTube</h3><p>Public YouTube channel.</p></div></div>
+              <label>YouTube URL<input type="url" value={siteForm.youtube_url||''} onChange={e=>setSiteForm({...siteForm,youtube_url:e.target.value})} placeholder="https://youtube.com/@..."/></label>
+              <label>Button Text<input value={siteForm.youtube_cta_text||''} onChange={e=>setSiteForm({...siteForm,youtube_cta_text:e.target.value})} placeholder="Subscribe on YouTube"/></label>
+            </div>
+
+            <div className="settings-card settings-card-wide">
+              <div className="settings-card-title"><div className="settings-icon orange">✦</div><div><h3>Hero Content</h3><p>Homepage ke main hero section ka text.</p></div></div>
+              <div className="settings-fields two-col">
+                <label>Hero Badge<input value={siteForm.hero_badge||''} onChange={e=>setSiteForm({...siteForm,hero_badge:e.target.value})}/></label>
+                <label>Hero Title<input value={siteForm.hero_title||''} onChange={e=>setSiteForm({...siteForm,hero_title:e.target.value})}/></label>
+                <label>Highlighted Text<input value={siteForm.hero_highlight||''} onChange={e=>setSiteForm({...siteForm,hero_highlight:e.target.value})}/></label>
+                <label>Hero Description<textarea rows="3" value={siteForm.hero_description||''} onChange={e=>setSiteForm({...siteForm,hero_description:e.target.value})}/></label>
+              </div>
+            </div>
+
+            <div className="settings-card settings-card-wide">
+              <div className="settings-card-title"><div className="settings-icon green">✓</div><div><h3>Public Sections</h3><p>Website ke sections ko ON / OFF karo.</p></div></div>
+              <div className="settings-switch-grid">
+                {[['show_hero','Hero Section','Homepage ka main hero'],['show_categories','Categories','Job/resource categories'],['show_latest_jobs','Latest Jobs','Latest government jobs'],['show_promotions','Promotions','Ads & promotional banners'],['show_whatsapp_cta','WhatsApp CTA','WhatsApp channel CTA'],['show_social_cta','Instagram + YouTube CTA','Social follow/subscribe block']].map(([key,label,desc])=><label className="settings-toggle" key={key}><span><strong>{label}</strong><small>{desc}</small></span><input type="checkbox" checked={!!siteForm[key]} onChange={e=>setSiteForm({...siteForm,[key]:e.target.checked})}/><i/></label>)}
+              </div>
+            </div>
+
+            <div className="settings-actions settings-card-wide">
+              {error&&<div className="settings-inline-error">{error}</div>}
+              {message&&<div className="settings-inline-success">{message}</div>}
+              <button className="admin-primary-button" type="submit" disabled={saving}><Save/> {saving?'Saving...':'Save All Public Settings'}</button>
+            </div>
+          </form>
+        </section>}
       </div>
     </main>
 
