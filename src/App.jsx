@@ -60,7 +60,6 @@ function CountdownCard({job,wa}){
     <div className="count-boxes">{["Days","Hours","Minutes","Seconds"].map((x,i)=><div key={x}><b>{i===0?Math.max(0,daysLeft(job?.last_date)||0):"—"}</b><small>{x}</small></div>)}</div>
     <div className="miss-strip"><Bell size={15}/> {d.tone==="urgent"?"Don't Miss!":"Apply Before Last Date"}</div>
     <a className="wa-hero" href={wa} target="_blank" rel="noreferrer"><MessageCircle size={22}/><span><b>Join WhatsApp Channel</b><small>Get Instant Job Updates & Notifications</small></span><ArrowRight size={19}/></a>
-    </div>
   </div>;
 }
 function Promotion({p,compact=false}){
