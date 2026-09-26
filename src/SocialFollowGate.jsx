@@ -1,7 +1,7 @@
 import React, { createContext, useCallback, useContext, useEffect, useMemo, useState } from "react";
 import { CheckCircle2, ExternalLink, Instagram, LockKeyhole, X, Youtube } from "lucide-react";
 
-const STORAGE_KEY = "sk_social_follow_gate_v1";
+const STORAGE_KEY = "sk_social_follow_gate_v2";
 const SocialFollowGateContext = createContext({ requestAccess: (cb) => cb?.() });
 
 function readState() {
@@ -14,12 +14,18 @@ function readState() {
   }
 }
 
-function readGateRequired() {
+function readSavedGate() {
   try {
     const raw = localStorage.getItem(STORAGE_KEY);
-    return !!(raw && JSON.parse(raw).gateRequired);
+    const parsed = raw ? JSON.parse(raw) : {};
+    return {
+      instagram: !!parsed.instagram,
+      youtube: !!parsed.youtube,
+      gateRequired: !!parsed.gateRequired,
+      clickCount: Number(parsed.clickCount) || 0
+    };
   } catch {
-    return false;
+    return { instagram: false, youtube: false, gateRequired: false, clickCount: 0 };
   }
 }
 
@@ -32,16 +38,17 @@ export function useSocialFollowGate() {
 }
 
 export default function SocialFollowGate({ children, instagramUrl, youtubeUrl, triggerEvery = 3 }) {
-  const [status, setStatus] = useState(readState);
-  const [clickCount, setClickCount] = useState(0);
-  const [gateRequired, setGateRequired] = useState(readGateRequired);
+  const [saved] = useState(readSavedGate);
+  const [status, setStatus] = useState({ instagram: saved.instagram, youtube: saved.youtube });
+  const [clickCount, setClickCount] = useState(saved.clickCount);
+  const [gateRequired, setGateRequired] = useState(saved.gateRequired);
   const [open, setOpen] = useState(false);
   const [pending, setPending] = useState(null);
 
   const unlocked = status.instagram && status.youtube;
 
   useEffect(() => {
-    saveState({ ...status, gateRequired });
+    saveState({ ...status, gateRequired, clickCount });
   }, [status, gateRequired]);
 
   const requestAccess = useCallback((onAllowed) => {
