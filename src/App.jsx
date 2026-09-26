@@ -8,6 +8,7 @@ import {
 } from "lucide-react";
 import { supabase } from "./lib/supabase";
 import "./App.css";
+import "./AppDetailExact.css";
 
 const WA_FALLBACK = "https://whatsapp.com/channel/0029Vb6H3cS1SWsyxdVo471w";
 const IG_FALLBACK = "https://instagram.com/skdigitalservice.dhule";
@@ -45,8 +46,7 @@ function publishedSort(a,b){
 }
 function Logo({className=""}){ return <img className={`sk-logo ${className}`} src="/sk-logo.png" alt="SK DIGITAL SERVICE"/>; }
 function Thumb({r,large=false}){
-  const orgLogo = safeUrl(r?.organization_logo_url);
-  if(orgLogo) return <img className={`thumb-image org-logo-image ${large?"large":""}`} src={orgLogo} alt={r?.organization||"Organization logo"} loading="lazy"/>;
+  if(r?.organization_logo_url) return <div className={`org-logo-thumb ${large?"large":""}`}><img src={r.organization_logo_url} alt={r?.organization||"Organization logo"} loading="lazy"/></div>;
   if(r?.thumbnail_url) return <img className={`thumb-image ${large?"large":""}`} src={r.thumbnail_url} alt="" loading="lazy"/>;
   return <div className={`thumb-fallback ${large?"large":""}`}><div className="tf-glow"/><b>SK</b><span>DIGITAL SERVICE</span><strong>{r?.organization||"Government Recruitment 2026"}</strong><em>{r?.title||"Latest Government Job"}</em><small>{r?.total_vacancies||"—"} Vacancies • Last Date {dateText(r?.last_date)}</small></div>;
 }
@@ -92,21 +92,8 @@ function JobCard({r,onOpen}){
   const d=deadline(r.last_date);
   return <button className="job-list-card" onClick={()=>onOpen(r)}>
     <div className="job-logo-wrap"><Thumb r={r}/></div>
-    <div className="job-main-copy">
-      <div className="job-title-row">
-        <h3>{r.title||"Government Job Recruitment"}</h3>
-        <span>{r.job_category||r.category||"Government Job"}</span>
-      </div>
-      <div className="job-stats">
-        <div className="job-stat-box"><small>VACANCY</small><b>{r.total_vacancies||"—"}</b></div>
-        <div className="job-stat-box"><small>QUALIFICATION</small><b>{r.qualification||"See Notification"}</b></div>
-        <div className="job-stat-box"><small>LAST DATE</small><b>{dateText(r.last_date)}</b></div>
-      </div>
-    </div>
-    <div className="job-card-action">
-      <span className={`days-pill ${d.tone}`}><Clock3 size={13}/> {d.text}</span>
-      <span className="apply-mini">Apply Now <ArrowRight size={15}/></span>
-    </div>
+    <div className="job-main-copy"><div className="job-title-row"><h3>{r.title||"Government Job Recruitment"}</h3><span>{r.job_category||r.category||"Government Job"}</span></div><div className="job-meta"><span>◆ Vacancies: <b>{r.total_vacancies||"—"}</b></span><i/> <span>Qualification: <b>{r.qualification||"See Notification"}</b></span></div><div className="job-meta"><span>▣ Start: <b>{dateText(r.application_start_date)}</b></span><i/> <span>◷ Last Date: <b>{dateText(r.last_date)}</b></span></div></div>
+    <div className="job-card-action"><span className={`days-pill ${d.tone}`}><Clock3 size={13}/> {d.text}</span><span className="apply-mini">Apply Now <ArrowRight size={15}/></span></div>
   </button>;
 }
 
@@ -115,21 +102,33 @@ function JobDetail({r,resources,onBack,wa}){
   const related=resources.filter(x=>x.id!==r.id&&x.is_published).sort(publishedSort).slice(0,3);
   const share=async()=>{try{if(navigator.share) await navigator.share({title:r.title||"SK DIGITAL SERVICE",text:r.short_description||r.title,url:location.href});else{await navigator.clipboard.writeText(location.href);alert("Job link copied.");}}catch{}};
   const back=()=>onBack();
-  return <div className="detail-page">
+  const orgLogo=safeUrl(r.organization_logo_url);
+  return <div className="detail-page detail-reference-page">
     <header className="detail-header"><div className="shell detail-head-inner"><button className="back-btn" onClick={back}><ChevronLeft size={17}/> Resource Hub</button><Logo/><button className="icon-btn" onClick={share}><Share2 size={18}/></button></div></header>
     <main className="shell detail-main">
       <div className="breadcrumbs"><button onClick={back}>Home</button><ChevronRight size={13}/><span>{r.job_category||r.category||"Government Jobs"}</span><ChevronRight size={13}/><b>{r.title}</b></div>
-      <section className="detail-hero"><div className="gov-mark">भारत<small>Government Job</small></div><div><span className="eyebrow">GOVERNMENT JOB OPPORTUNITY</span><h1>{r.title||"Government Recruitment 2026"}</h1><p>{r.organization||"Government Department"} {r.post_name?`• ${r.post_name}`:""}</p><div className="pills"><span><CheckCircle2 size={14}/> Verified Update</span>{r.is_featured&&<span><Star size={14}/> Featured</span>}<span className={`deadline-pill ${d.tone}`}><Clock3 size={14}/>{d.text}</span></div></div><div className="detail-thumb"><Thumb r={r} large/></div></section>
-      <section className="stat-grid">{[["Total Vacancies",r.total_vacancies,Users],["Qualification",r.qualification,GraduationCap],["Age Limit",r.age_limit,CalendarDays],["Last Date",dateText(r.last_date),Clock3],["Application Fee",r.application_fee,IndianRupee]].map(([a,b,I])=><div key={a}><I size={21}/><small>{a}</small><b>{b||"—"}</b></div>)}</section>
-      <div className="detail-layout"><div>
-        <InfoBlock title="Job Overview" icon={BriefcaseBusiness} cls="blue">{[["Organization / Department",r.organization],["Post Name",r.post_name],["Total Vacancies",r.total_vacancies],["Qualification",r.qualification],["Age Limit",r.age_limit],["Application Fee",r.application_fee],["Job Location",r.job_location],["Application Start Date",dateText(r.application_start_date)],["Last Date",dateText(r.last_date)]].map(([a,b])=><div className="overview-row" key={a}><span>{a}</span><b>{b||"—"}</b></div>)}</InfoBlock>
-        <InfoBlock title="Eligibility Criteria" icon={GraduationCap} cls="cyan"><div className="elig-grid">{[["Educational Qualification",r.qualification],["Age Limit",r.age_limit],["Post / Vacancy",r.post_name||r.total_vacancies],["Job Location",r.job_location]].map(([a,b])=><div key={a}><Info size={17}/><span><small>{a}</small><b>{b||"See official notification"}</b></span></div>)}</div></InfoBlock>
+      <section className="ref-hero">
+        <div className="ref-org-logo">{orgLogo?<img src={orgLogo} alt={r.organization||"Organization logo"}/>:null}</div>
+        <div className="ref-hero-copy">
+          <span className="ref-badge">GOVERNMENT JOB</span>
+          <h1>{r.title||"Government Recruitment 2026"}</h1>
+          <p className="ref-org">{r.organization||"Government Department"}</p>
+          {r.post_name&&<p className="ref-post">{r.post_name}</p>}
+          <div className="ref-meta"><span><CalendarDays/> Notification Released: {dateText(r.application_start_date)}</span><i/> <span>Last Date: {dateText(r.last_date)}</span></div>
+          <div className="ref-pills"><span><ShieldCheck/> Verified Notification</span>{r.is_featured&&<span><Star/> Featured Job</span>}<span><Landmark/> {r.job_category||"Government Job"}</span></div>
+        </div>
+        <div className="ref-hero-art">{r.thumbnail_url?<img src={r.thumbnail_url} alt=""/>:<div className="ref-art-placeholder"><Landmark size={64}/><b>{r.organization||"Government Recruitment"}</b><span>Official Job Update</span></div>}<div className="ref-art-copy"><span>Build Your Career</span><b>with {r.job_category||"Government Jobs"}</b></div><div className="ref-hero-summary"><div><Users/><small>Total Vacancies</small><b>{r.total_vacancies||"—"}</b></div><div><BriefcaseBusiness/><small>Posts</small><b>{r.post_name||"Multiple Posts"}</b></div><div><MapPin/><small>Job Location</small><b>{r.job_location||"Across India"}</b></div></div></div>
+      </section>
+      <section className="ref-stat-grid">{[["Total Vacancies",r.total_vacancies,Users],["Qualification",r.qualification,GraduationCap],["Age Limit",r.age_limit,CalendarDays],["Last Date",dateText(r.last_date),Clock3],["Application Fee",r.application_fee,IndianRupee]].map(([a,b,I],i)=><div className={`ref-stat s${i}`} key={a}><span className="ref-stat-icon"><I/></span><small>{a}</small><b>{b||"—"}</b>{i===1&&<em>(Post-specific)</em>}{i===2&&<em>(Post-wise)</em>}{i===3&&<em>(Online Application)</em>}{i===4&&<em>(Category Wise)</em>}</div>)}</section>
+      <div className="ref-detail-layout"><div>
+        <InfoBlock title="Job Overview" icon={BriefcaseBusiness} cls="blue"><div className="ref-overview">{[["Organization / Department",r.organization],["Post Name",r.post_name],["Total Vacancies",r.total_vacancies],["Qualification",r.qualification],["Age Limit",r.age_limit],["Application Fee",r.application_fee],["Job Location",r.job_location],["Application Start Date",dateText(r.application_start_date)],["Last Date",dateText(r.last_date)]].map(([a,b])=><div className="ref-overview-row" key={a}><span>{a}</span><b>{b||"—"}</b></div>)}</div></InfoBlock>
+        <InfoBlock title="Eligibility Criteria" icon={GraduationCap} cls="cyan"><div className="ref-elig-grid">{[["Educational Qualification",r.qualification,GraduationCap],["Age Limit",r.age_limit,CalendarDays],["Post / Vacancy",r.post_name||r.total_vacancies,BriefcaseBusiness],["Job Location",r.job_location,MapPin]].map(([a,b,I])=><div key={a}><I/><span><small>{a}</small><b>{b||"See official notification"}</b></span></div>)}</div></InfoBlock>
         <InfoBlock title="Important Links" icon={Link2} cls="purple"><div className="link-list">{apply&&<a href={apply} target="_blank" rel="noreferrer"><span><WalletCards/> Apply Online Link</span><ExternalLink/></a>}{note&&<a href={note} target="_blank" rel="noreferrer"><span><FileText/> Official Notification</span><ExternalLink/></a>}{web&&<a href={web} target="_blank" rel="noreferrer"><span><Globe2/> Official Website</span><ExternalLink/></a>}</div></InfoBlock>
         {(r.full_description||r.description)&&<InfoBlock title="About This Job" icon={FileText} cls="green"><div className="description">{String(r.full_description||r.description).split(/\n+/).map((x,i)=><p key={i}>{x}</p>)}</div></InfoBlock>}
       </div><aside className="detail-side"><div className="sticky">
-        <div className="notification-card"><Thumb r={r}/><div className="pdf-name"><FileText size={15}/> Official Notification</div>{note?<a className="apply-btn" href={apply||note} target="_blank" rel="noreferrer"><span><b>{apply?"Apply Now":"View Notification"}</b><small>{apply?"Open official application":"Open official PDF/page"}</small></span><ArrowRight/></a>:apply?<a className="apply-btn" href={apply} target="_blank" rel="noreferrer"><span><b>Apply Now</b><small>Open application portal</small></span><ArrowRight/></a>:null}{note&&<a className="secondary-btn" href={note} target="_blank" rel="noreferrer"><FileText/> <span><b>View Notification</b><small>Official recruitment notification</small></span><ExternalLink/></a>}{web&&<a className="secondary-btn" href={web} target="_blank" rel="noreferrer"><Globe2/> <span><b>Official Website</b><small>Department website</small></span><ExternalLink/></a>}</div>
+        <div className="ref-apply-card">{orgLogo&&<div className="ref-side-logo"><img src={orgLogo} alt=""/></div>}<h3>{r.title||"Government Recruitment 2026"}</h3><p>Apply online and take the next step toward your career.</p>{apply&&<a className="ref-apply-btn" href={apply} target="_blank" rel="noreferrer">Apply Now <ArrowRight/></a>}{note&&<a className="ref-notification-btn" href={note} target="_blank" rel="noreferrer"><FileText/> Official Notification <ExternalLink/></a>}</div>
+        <div className="ref-quick-card"><h3><Link2/> Quick Links</h3>{note&&<a href={note} target="_blank" rel="noreferrer"><span><FileText/><b>Official Notification<small>View / Download</small></b></span><ChevronRight/></a>}{apply&&<a href={apply} target="_blank" rel="noreferrer"><span><WalletCards/><b>Apply Online<small>Open application portal</small></b></span><ChevronRight/></a>}{web&&<a href={web} target="_blank" rel="noreferrer"><span><Globe2/><b>Official Website<small>Department website</small></b></span><ChevronRight/></a>}</div>
         <div className="share-card"><h3>Share This Job</h3><div><button onClick={share}><Share2/> Share</button><button onClick={async()=>{await navigator.clipboard.writeText(location.href);alert("Copied.");}}><Copy/> Copy Link</button></div></div>
-        <div className="why-card"><h3>Why Choose SK Digital Service?</h3><p><ShieldCheck/> Trusted & Reliable Information</p><p><Zap/> Fast Government Job Updates</p><p><CheckCircle2/> Easy Online Access</p><p><MessageCircle/> WhatsApp Notifications</p></div>
       </div></aside></div>
       {related.length>0&&<section className="related"><div className="section-head"><div><span>YOU MAY ALSO LIKE</span><h2>Latest Government Jobs</h2></div><button onClick={back}>View All <ArrowRight size={16}/></button></div><div className="related-grid">{related.map(x=><button key={x.id} onClick={()=>{history.pushState({}, "", `/resource/${x.slug||x.id}`);window.dispatchEvent(new PopStateEvent("popstate"));}}><Thumb r={x}/><span>{x.job_category||x.category}</span><b>{x.title}</b><small>{deadline(x.last_date).text}</small><ArrowRight/></button>)}</div></section>}
     </main>
@@ -157,7 +156,7 @@ export default function App(){
   const nearest=useMemo(()=>gov.filter(r=>daysLeft(r.last_date)>=0).sort((a,b)=>(daysLeft(a.last_date)??9999)-(daysLeft(b.last_date)??9999))[0]||gov[0],[gov]);
   const filtered=useMemo(()=>{const q=search.trim().toLowerCase();let arr=[...gov];if(selectedCat!=="latest")arr=arr.filter(r=>jobCat(r)===selectedCat);if(q)arr=arr.filter(r=>[r.title,r.organization,r.post_name,r.qualification,r.job_category,r.category,...(r.tags||[])].filter(Boolean).join(" ").toLowerCase().includes(q));return arr.sort(publishedSort);},[gov,selectedCat,search]);
   const wa=safeUrl(settings?.whatsapp_channel_url)||WA_FALLBACK;
-  const ig=safeUrl(settings?.instagram_url)||IG_FALLBACK, yt=safeUrl(settings?.youtube_url)||YT_FALLBACK;
+  const ig=IG_FALLBACK, yt=YT_FALLBACK;
   const topPromos=promotions.filter(p=>p.placement==="top"), sidePromos=promotions.filter(p=>p.placement==="sidebar"), bottomPromos=promotions.filter(p=>p.placement==="bottom");
   const openJob=(r)=>{history.pushState({}, "", `/resource/${r.slug||r.id}`);setRoute(`/resource/${r.slug||r.id}`);window.scrollTo(0,0);};
 
