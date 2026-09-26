@@ -4,7 +4,7 @@ import App from "./App";
 import Admin from "./Admin";
 import "./styles.css";
 
-const isAdminPage = window.location.pathname === "/admin";
+const isAdminPage = /^\/admin(?:\/)?$/.test(window.location.pathname);
 
 ReactDOM.createRoot(document.getElementById("root")).render(
   <React.StrictMode>
