@@ -9,6 +9,7 @@ import {
 import { supabase } from "./lib/supabase";
 import "./App.css";
 import "./AppDetailExact.css";
+import SocialFollowGate, { useSocialFollowGate } from "./SocialFollowGate";
 
 const WA_FALLBACK = "https://whatsapp.com/channel/0029Vb6H3cS1SWsyxdVo471w";
 const IG_FALLBACK = "https://instagram.com/skdigitalservice.dhule";
@@ -59,6 +60,7 @@ function CountdownCard({job,wa}){
     <div className="count-boxes">{["Days","Hours","Minutes","Seconds"].map((x,i)=><div key={x}><b>{i===0?Math.max(0,daysLeft(job?.last_date)||0):"—"}</b><small>{x}</small></div>)}</div>
     <div className="miss-strip"><Bell size={15}/> {d.tone==="urgent"?"Don't Miss!":"Apply Before Last Date"}</div>
     <a className="wa-hero" href={wa} target="_blank" rel="noreferrer"><MessageCircle size={22}/><span><b>Join WhatsApp Channel</b><small>Get Instant Job Updates & Notifications</small></span><ArrowRight size={19}/></a>
+    </div>
   </div>;
 }
 function Promotion({p,compact=false}){
@@ -90,7 +92,8 @@ function Header({search,setSearch,openMenu=false,onMenu,dark,onToggleTheme}){
 
 function JobCard({r,onOpen}){
   const d=deadline(r.last_date);
-  return <button className="job-list-card" onClick={()=>onOpen(r)}>
+  const { requestAccess } = useSocialFollowGate();
+  return <button className="job-list-card" onClick={()=>requestAccess(()=>onOpen(r))}>
     <div className="job-logo-wrap"><Thumb r={r}/></div>
     <div className="job-main-copy"><div className="job-title-row"><h3>{r.title||"Government Job Recruitment"}</h3><span>{r.job_category||r.category||"Government Job"}</span></div><div className="job-meta"><span>◆ Vacancies: <b>{r.total_vacancies||"—"}</b></span><i/> <span>Qualification: <b>{r.qualification||"See Notification"}</b></span></div><div className="job-meta"><span>▣ Start: <b>{dateText(r.application_start_date)}</b></span><i/> <span>◷ Last Date: <b>{dateText(r.last_date)}</b></span></div></div>
     <div className="job-card-action"><span className={`days-pill ${d.tone}`}><Clock3 size={13}/> {d.text}</span><span className="apply-mini">Apply Now <ArrowRight size={15}/></span></div>
@@ -156,12 +159,14 @@ export default function App(){
   const nearest=useMemo(()=>gov.filter(r=>daysLeft(r.last_date)>=0).sort((a,b)=>(daysLeft(a.last_date)??9999)-(daysLeft(b.last_date)??9999))[0]||gov[0],[gov]);
   const filtered=useMemo(()=>{const q=search.trim().toLowerCase();let arr=[...gov];if(selectedCat!=="latest")arr=arr.filter(r=>jobCat(r)===selectedCat);if(q)arr=arr.filter(r=>[r.title,r.organization,r.post_name,r.qualification,r.job_category,r.category,...(r.tags||[])].filter(Boolean).join(" ").toLowerCase().includes(q));return arr.sort(publishedSort);},[gov,selectedCat,search]);
   const wa=safeUrl(settings?.whatsapp_channel_url)||WA_FALLBACK;
-  const ig=IG_FALLBACK, yt=YT_FALLBACK;
+  const ig=safeUrl(settings?.instagram_url)||IG_FALLBACK;
+  const yt=safeUrl(settings?.youtube_url)||YT_FALLBACK;
   const topPromos=promotions.filter(p=>p.placement==="top"), sidePromos=promotions.filter(p=>p.placement==="sidebar"), bottomPromos=promotions.filter(p=>p.placement==="bottom");
   const openJob=(r)=>{history.pushState({}, "", `/resource/${r.slug||r.id}`);setRoute(`/resource/${r.slug||r.id}`);window.scrollTo(0,0);};
 
   if(route.startsWith("/resource/")){const slug=decodeURIComponent(route.split("/resource/")[1]||"");const r=resources.find(x=>String(x.slug||x.id)===slug);if(r)return <JobDetail r={r} resources={resources} onBack={()=>{history.pushState({}, "", "/");setRoute("/");}} wa={wa}/>;}
-  return <div className="public-site">
+  return <SocialFollowGate instagramUrl={ig} youtubeUrl={yt}>
+    <div className="public-site">
     <Header search={search} setSearch={setSearch} openMenu={mobileNav} onMenu={()=>setMobileNav(v=>!v)} dark={dark} onToggleTheme={()=>setDark(v=>!v)}/>
     <main>
       <section className="hero-section"><div className="shell hero-grid">
@@ -217,5 +222,6 @@ export default function App(){
         <span>Built with ❤ for a Digital India</span>
       </div>
     </footer>
-  </div>;
+    </div>
+  </SocialFollowGate>;
 }
