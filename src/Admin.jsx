@@ -21,77 +21,50 @@ const emptyForm = {
   organization: "", postName: "", totalVacancies: "", qualification: "", ageLimit: "", applicationFee: "",
   jobLocation: "", applicationStartDate: "", lastDate: "", applyUrl: "", notificationUrl: "", officialWebsiteUrl: "",
   resourceType: "pdf", isFree: true, price: "", tags: "", isPublished: false, isFeatured: false,
-  file: null, image: null,
+  file: null, image: null, organizationLogo: null, organizationLogoUrl: "", organizationLogoPath: "",
 };
 
 function slugify(value) {
   return String(value || "").toLowerCase().trim().replace(/[^a-z0-9]+/g, "-").replace(/^-+|-+$/g, "").slice(0, 100);
 }
-const MONTHS={january:1,february:2,march:3,april:4,may:5,june:6,july:7,august:8,september:9,october:10,november:11,december:12,jan:1,feb:2,mar:3,apr:4,jun:6,jul:7,aug:8,sep:9,sept:9,oct:10,nov:11,dec:12};
-function normalizeDate(value){return value?String(value).slice(0,10):""}
-function dateToISO(value){
-  const v=String(value||"").trim().replace(/,/g,"").replace(/\s+/g," ");
-  let m=v.match(/\b(\d{1,2})[\/-](\d{1,2})[\/-](\d{4})\b/);
-  if(m){const d=+m[1],mo=+m[2],y=+m[3];if(mo>=1&&mo<=12&&d>=1&&d<=31)return `${y}-${String(mo).padStart(2,"0")}-${String(d).padStart(2,"0")}`}
-  m=v.match(/\b(\d{1,2})\s+([A-Za-z]{3,9})\s+(\d{4})\b/i);
-  if(m){const d=+m[1],mo=MONTHS[m[2].toLowerCase()];if(mo&&d>=1&&d<=31)return `${m[3]}-${String(mo).padStart(2,"0")}-${String(d).padStart(2,"0")}`}
-  m=v.match(/\b([A-Za-z]{3,9})\s+(\d{1,2})\s+(\d{4})\b/i);
-  if(m){const mo=MONTHS[m[1].toLowerCase()],d=+m[2];if(mo&&d>=1&&d<=31)return `${m[3]}-${String(mo).padStart(2,"0")}-${String(d).padStart(2,"0")}`}
-  m=v.match(/\b(\d{4})-(\d{1,2})-(\d{1,2})\b/);
-  if(m)return `${m[1]}-${String(+m[2]).padStart(2,"0")}-${String(+m[3]).padStart(2,"0")}`;
+function normalizeDate(value) { return value ? String(value).slice(0, 10) : ""; }
+function parseDateFromText(text) {
+  const m = String(text || "").match(/\b(\d{1,2})[\/-](\d{1,2})[\/-](\d{4})\b/);
+  return m ? `${m[3]}-${m[2].padStart(2,"0")}-${m[1].padStart(2,"0")}` : "";
+}
+function firstMatch(text, patterns) {
+  for (const p of patterns) { const m = text.match(p); if (m?.[1]) return m[1].trim(); }
   return "";
 }
-function extractDates(value){
-  const text=String(value||"").replace(/[–—]/g,"-").replace(/\u00a0/g," ");
-  const re=/\b(?:\d{1,2}[\/-]\d{1,2}[\/-]\d{4}|\d{1,2}\s+[A-Za-z]{3,9}\s+\d{4}|[A-Za-z]{3,9}\s+\d{1,2}\s+\d{4}|\d{4}-\d{1,2}-\d{1,2})\b/gi;
-  return [...text.matchAll(re)].map(m=>({raw:m[0],index:m.index,iso:dateToISO(m[0])})).filter(x=>x.iso);
-}
-function parseDateFromText(text){return extractDates(text)[0]?.iso||""}
-function firstMatch(text,patterns){for(const p of patterns){const m=String(text||"").match(p);if(m?.[1])return m[1].trim()}return ""}
-function valueAfterLabel(text,labels){
-  const escaped=labels.map(x=>x.replace(/[.*+?^${}()|[\]\\]/g,"\\$&")).join("|");
-  const re=new RegExp(`(?:${escaped})\\s*(?:is|are|:|-|–|—)?\\s*([^\\n\\r]+)`,"i");
-  return firstMatch(text,[re]);
-}
-function dateAfterLabels(text,labels){
-  const raw=valueAfterLabel(text,labels); return dateToISO(raw);
-}
-function parseJobText(text){
-  const t=String(text||"").replace(/\u00a0/g," ").replace(/[–—]/g,"-");
-  const lines=t.split(/\r?\n/).map(x=>x.trim()).filter(Boolean);
-  const get=labels=>valueAfterLabel(t,labels);
-  const urls=[...t.matchAll(/https?:\/\/[^\s<>"']+/gi)].map(m=>m[0].replace(/[),.;]+$/,""));
-  const title=get(["Post Name","Job Title","Recruitment Name","Vacancy Name","Position","Name of Post","Name of the Post"])||lines.find(x=>!/^https?:\/\//i.test(x)&&x.length>2)?.replace(/^[-•#*\s]+/,"")||get(["Recruitment","Recruitment Title"]);
-  const organization=get(["Organization","Organisation","Department","Ministry","Company","Board","Recruiting Organization","Recruiting Organisation","Conducting Authority"]);
-  const postName=get(["Post Name","Post","Position","Name of Post","Name of the Post"]);
-  const totalVacancies=get(["Total Vacancies","Total Vacancy","Vacancies","Vacancy","No. of Vacancies","No. of Vacancy","Number of Vacancies","No. of Posts","Total Posts","Posts"]);
-  const qualification=get(["Qualification","Educational Qualification","Education Qualification","Eligibility","Education","Minimum Qualification"]);
-  const ageLimit=get(["Age Limit","Age","Age Criteria"]);
-  const applicationFee=get(["Application Fee","Fee","Exam Fee","Application Fees"]);
-  const jobLocation=get(["Job Location","Location","Posting","Place of Posting"]);
-  const startRaw=get(["Application Start Date","Application Starting Date","Start Date","Apply Start Date","Apply Start","Registration Starts","Registration Start Date","Online Application Starts","Applications Begin","Application Begins"]);
-  const lastRaw=get(["Last Date to Apply","Last Date","Application Last Date","Application Closing Date","Closing Date","Apply Last Date","Registration Ends","Registration End Date","Online Application Ends","Application Closes","Closing"]);
-  const allDates=extractDates(t);
-  let applicationStartDate=dateToISO(startRaw);
-  let lastDate=dateToISO(lastRaw);
-  if(!applicationStartDate){
-    const range=t.match(/(?:from|between|starting|starts?|begin(?:s|ning)?)\s+([^\n]{0,60}?\d{4})\s*(?:to|until|till|-|–|—)\s*([^\n]{0,60}?\d{4})/i);
-    if(range){applicationStartDate=dateToISO(range[1])||allDates[0]?.iso||"";lastDate=dateToISO(range[2])||allDates[1]?.iso||""}
-  }
-  if(!applicationStartDate && allDates.length===1 && /start|begin|open|commenc/i.test(t))applicationStartDate=allDates[0].iso;
-  if(!lastDate){
-    const lastLine=lines.find(x=>/last\s*date|closing|close|deadline|ends?|till|until/i.test(x));
-    lastDate=dateToISO(lastLine)||"";
-  }
-  if(!lastDate && allDates.length>=2 && /apply|application|registration|submission|form/i.test(t))lastDate=allDates[allDates.length-1].iso;
-  if(!applicationStartDate && allDates.length>=2 && /apply|application|registration|submission|form/i.test(t))applicationStartDate=allDates[0].iso;
-  const applyUrl=firstMatch(t,[/Apply\s*(?:Online|Now|Here)?\s*[:\-]?\s*(https?:\/\/[^\s]+)/i,/(?:Apply\s*Link|Online\s*Application)\s*[:\-]?\s*(https?:\/\/[^\s]+)/i])||urls[0]||"";
-  const notificationUrl=firstMatch(t,[/Notification\s*(?:PDF|Link)?\s*[:\-]?\s*(https?:\/\/[^\s]+)/i,/(?:Official\s*Notification|Notification\s*URL)\s*[:\-]?\s*(https?:\/\/[^\s]+)/i])||"";
-  const officialWebsiteUrl=firstMatch(t,[/Official\s*Website\s*[:\-]?\s*(https?:\/\/[^\s]+)/i,/(?:Website|Official\s*Site)\s*[:\-]?\s*(https?:\/\/[^\s]+)/i])||"";
-  let jobCategory="Other";const low=`${title} ${organization} ${postName}`.toLowerCase();
-  if(/ssc|chsl|cgl|cpo|mts/.test(low))jobCategory="SSC";else if(/gds|india post|post office/.test(low))jobCategory="GDS";else if(/railway|rrb|ntpc|group d/.test(low))jobCategory="Railway";else if(/ibps|bank|sbi|rbi/.test(low))jobCategory="Banking";else if(/army|navy|air force|defence|aoc|ship building/.test(low))jobCategory="Defence";else if(/police|constable|si |sub inspector/.test(low))jobCategory="Police";else if(/teacher|teaching|school|professor|lecturer/.test(low))jobCategory="Teaching";
-  const shortDescription=organization?`${organization} recruitment update${postName?` for ${postName}`:""}.`:title;const fullDescription=t.trim();
-  return {title,organization,postName,totalVacancies,qualification,ageLimit,applicationFee,jobLocation,applicationStartDate,lastDate,applyUrl,notificationUrl,officialWebsiteUrl,jobCategory,shortDescription,fullDescription};
+function parseJobText(text) {
+  const t = String(text || "");
+  const get = (labels) => firstMatch(t, labels.map(l => new RegExp(`${l}\\s*[:\\-]\\s*([^\\n\\r]+)`, "i")));
+  const urls = [...t.matchAll(/https?:\/\/[^\s<>"']+/gi)].map(m => m[0].replace(/[),.;]+$/,""));
+  const title = get(["Post Name", "Job Title", "Recruitment", "Vacancy", "Position"]) || t.split(/\r?\n/).find(x => x.trim())?.trim() || "";
+  const organization = get(["Organization", "Department", "Company", "Board", "Recruiting Organization"]);
+  const postName = get(["Post Name", "Post", "Position"]);
+  const totalVacancies = get(["Total Vacancies", "Vacancies", "No. of Vacancies", "Number of Vacancies"]);
+  const qualification = get(["Qualification", "Educational Qualification", "Eligibility", "Education"]);
+  const ageLimit = get(["Age Limit", "Age"]);
+  const applicationFee = get(["Application Fee", "Fee", "Exam Fee"]);
+  const jobLocation = get(["Job Location", "Location", "Posting"]);
+  const applicationStartDate = get(["Application Start Date", "Start Date", "Apply Start", "Registration Starts"]) || parseDateFromText(t);
+  const lastDate = get(["Last Date", "Last Date to Apply", "Closing Date", "Application Last Date"]);
+  const applyUrl = firstMatch(t, [/Apply\s*(?:Online|Now)?\s*[:\-]?\s*(https?:\/\/[^\s]+)/i]) || urls[0] || "";
+  const notificationUrl = firstMatch(t, [/Notification\s*(?:PDF|Link)?\s*[:\-]?\s*(https?:\/\/[^\s]+)/i]) || "";
+  const officialWebsiteUrl = firstMatch(t, [/Official\s*Website\s*[:\-]?\s*(https?:\/\/[^\s]+)/i]) || "";
+  let jobCategory = "Other";
+  const low = `${title} ${organization} ${postName}`.toLowerCase();
+  if (/ssc|chsl|cgl|cpo|mts/.test(low)) jobCategory = "SSC";
+  else if (/gds|india post|post office/.test(low)) jobCategory = "GDS";
+  else if (/railway|rrb|ntpc|group d/.test(low)) jobCategory = "Railway";
+  else if (/ibps|bank|sbi|rbi/.test(low)) jobCategory = "Banking";
+  else if (/army|navy|air force|defence|aoc|ship building/.test(low)) jobCategory = "Defence";
+  else if (/police|constable|si |sub inspector/.test(low)) jobCategory = "Police";
+  else if (/teacher|teaching|school|professor|lecturer/.test(low)) jobCategory = "Teaching";
+  const shortDescription = organization ? `${organization} recruitment update${postName ? ` for ${postName}` : ""}.` : title;
+  const fullDescription = t.trim();
+  return { title, organization, postName, totalVacancies, qualification, ageLimit, applicationFee, jobLocation, applicationStartDate, lastDate, applyUrl, notificationUrl, officialWebsiteUrl, jobCategory, shortDescription, fullDescription };
 }
 
 function Admin() {
@@ -135,15 +108,17 @@ function Admin() {
   const filtered=useMemo(()=>{const q=search.toLowerCase().trim();return resources.filter(r=>(!q||[r.title,r.organization,r.post_name,r.job_category,r.category].filter(Boolean).join(" ").toLowerCase().includes(q))&&(statusFilter==="all"||(statusFilter==="published"&&r.is_published)||(statusFilter==="draft"&&!r.is_published)));},[resources,search,statusFilter]);
 
   function openAddResource(){setEditingResource(null);setForm({...emptyForm,category:"Government Jobs"});setJobBuilderText("");setError("");setShowResourceModal(true)}
-  function openEditResource(r){setEditingResource(r);setForm({title:r.title||"",shortDescription:r.short_description||"",fullDescription:r.full_description||r.description||"",category:r.category||"Government Jobs",jobCategory:r.job_category||"Other",organization:r.organization||"",postName:r.post_name||"",totalVacancies:r.total_vacancies||"",qualification:r.qualification||"",ageLimit:r.age_limit||"",applicationFee:r.application_fee||"",jobLocation:r.job_location||"",applicationStartDate:normalizeDate(r.application_start_date),lastDate:normalizeDate(r.last_date),applyUrl:r.apply_url||"",notificationUrl:r.notification_url||"",officialWebsiteUrl:r.official_website_url||"",resourceType:r.resource_type||"pdf",isFree:r.is_free!==false,price:r.price||"",tags:(r.tags||[]).join(", "),isPublished:!!r.is_published,isFeatured:!!r.is_featured,file:null,image:null});setJobBuilderText("");setError("");setShowResourceModal(true)}
+  function openEditResource(r){setEditingResource(r);setForm({title:r.title||"",shortDescription:r.short_description||"",fullDescription:r.full_description||r.description||"",category:r.category||"Government Jobs",jobCategory:r.job_category||"Other",organization:r.organization||"",postName:r.post_name||"",totalVacancies:r.total_vacancies||"",qualification:r.qualification||"",ageLimit:r.age_limit||"",applicationFee:r.application_fee||"",jobLocation:r.job_location||"",applicationStartDate:normalizeDate(r.application_start_date),lastDate:normalizeDate(r.last_date),applyUrl:r.apply_url||"",notificationUrl:r.notification_url||"",officialWebsiteUrl:r.official_website_url||"",resourceType:r.resource_type||"pdf",isFree:r.is_free!==false,price:r.price||"",tags:(r.tags||[]).join(", "),isPublished:!!r.is_published,isFeatured:!!r.is_featured,file:null,image:null,organizationLogo:null,organizationLogoUrl:r.organization_logo_url||"",organizationLogoPath:r.organization_logo_path||""});setJobBuilderText("");setError("");setShowResourceModal(true)}
   function closeResource(){if(!saving)setShowResourceModal(false)}
-  function applyBuilder(){const p=parseJobText(jobBuilderText);const filled=Object.fromEntries(Object.entries(p).filter(([,v])=>String(v||"").trim()));setForm(f=>({...f,...filled,category:"Government Jobs"}));setMessage(`Auto Fill complete • ${Object.keys(filled).length} fields captured. Dates bhi capture ki gayi hain.`)}
+  function applyBuilder(){const p=parseJobText(jobBuilderText);setForm(f=>({...f,...Object.fromEntries(Object.entries(p).filter(([,v])=>v)),category:"Government Jobs"}));setMessage("Job details auto-filled. Review once before publishing.")}
 
   async function uploadFile(file,pathPrefix){
     if(!file)return null;
     const ext=file.name.split(".").pop()?.toLowerCase()||"bin";
     const path=`${pathPrefix}/${Date.now()}-${Math.random().toString(36).slice(2,9)}.${ext}`;
-    const {error:e}=await supabase.storage.from(["thumbs","promo","org-logos"].includes(pathPrefix)?"resource-thumbnails":"resources").upload(path,file,{upsert:false});
+    const publicPrefixes=["thumbs","promo","org-logos"];
+    const bucket=publicPrefixes.includes(pathPrefix)?"resource-thumbnails":"resources";
+    const {error:e}=await supabase.storage.from(bucket).upload(path,file,{upsert:false,contentType:file.type||undefined});
     if(e)throw e; return path;
   }
   function publicImageUrl(path){if(!path)return "";return supabase.storage.from("resource-thumbnails").getPublicUrl(path).data.publicUrl}
@@ -151,16 +126,24 @@ function Admin() {
   async function saveResource(e){
     e.preventDefault();setSaving(true);setError("");
     try{
+      if(!form.title.trim())throw new Error("Job/Resource title required hai.");
+      if(form.isPublished && !form.applyUrl.trim() && form.category==="Government Jobs") throw new Error("Published Government Job ke liye Apply URL required hai.");
       let filePath=editingResource?.file_path||null, imagePath=editingResource?.image_path||null;
+      let organizationLogoPath=editingResource?.organization_logo_path||null, organizationLogoUrl=editingResource?.organization_logo_url||"";
       if(form.file){if(form.file.type!=="application/pdf")throw new Error("Sirf PDF upload karein.");if(form.file.size>20*1024*1024)throw new Error("PDF maximum 20 MB ho sakti hai.");filePath=await uploadFile(form.file,"resources")}
       if(form.image){if(!form.image.type.startsWith("image/"))throw new Error("Thumbnail ke liye image file choose karein.");if(form.image.size>5*1024*1024)throw new Error("Image maximum 5 MB ho sakti hai.");imagePath=await uploadFile(form.image,"thumbs")}
-      const cleanTitle=form.title.trim()||"Government Job Update";
-      const slugBase=slugify(cleanTitle)||`resource-${Date.now()}`;
+      if(form.organizationLogo){
+        if(!form.organizationLogo.type.startsWith("image/"))throw new Error("Organization logo ke liye image file choose karein.");
+        if(form.organizationLogo.size>2*1024*1024)throw new Error("Organization logo maximum 2 MB ho sakta hai.");
+        organizationLogoPath=await uploadFile(form.organizationLogo,"org-logos");
+        organizationLogoUrl=publicImageUrl(organizationLogoPath);
+      }
+      const slugBase=slugify(form.title)||`resource-${Date.now()}`;
       const isNew=!editingResource;
       const wasPublished=!!editingResource?.is_published;
       const publishedAt=form.isPublished?(editingResource?.published_at||new Date().toISOString()):null;
-      const payload={title:cleanTitle,slug:slugBase,short_description:form.shortDescription.trim(),full_description:form.fullDescription.trim(),description:form.shortDescription.trim(),category:form.category,job_category:form.category==="Government Jobs"?form.jobCategory:null,organization:form.organization.trim(),post_name:form.postName.trim(),total_vacancies:form.totalVacancies.trim(),qualification:form.qualification.trim(),age_limit:form.ageLimit.trim(),application_fee:form.applicationFee.trim(),job_location:form.jobLocation.trim(),application_start_date:form.applicationStartDate||null,last_date:form.lastDate||null,apply_url:form.applyUrl.trim(),notification_url:form.notificationUrl.trim(),official_website_url:form.officialWebsiteUrl.trim(),resource_type:form.resourceType,is_free:form.isFree,price:form.isFree?null:Number(form.price)||null,tags:form.tags.split(",").map(x=>x.trim()).filter(Boolean),is_published:form.isPublished,is_featured:form.isFeatured,file_path:filePath,image_path:imagePath,thumbnail_url:imagePath?publicImageUrl(imagePath):editingResource?.thumbnail_url||null,published_at:publishedAt,updated_at:new Date().toISOString()};
-      if(isNew){const {error:e1}=await supabase.from("resources").insert(payload);if(e1)throw e1;setMessage(form.isPublished?"Job published successfully.":"Draft created successfully.")}
+      const payload={title:form.title.trim(),slug:slugBase,short_description:form.shortDescription.trim(),full_description:form.fullDescription.trim(),description:form.shortDescription.trim(),category:form.category,job_category:form.category==="Government Jobs"?form.jobCategory:null,organization:form.organization.trim(),post_name:form.postName.trim(),total_vacancies:form.totalVacancies.trim(),qualification:form.qualification.trim(),age_limit:form.ageLimit.trim(),application_fee:form.applicationFee.trim(),job_location:form.jobLocation.trim(),application_start_date:form.applicationStartDate||null,last_date:form.lastDate||null,apply_url:form.applyUrl.trim(),notification_url:form.notificationUrl.trim(),official_website_url:form.officialWebsiteUrl.trim(),resource_type:form.resourceType,is_free:form.isFree,price:form.isFree?null:Number(form.price)||null,tags:form.tags.split(",").map(x=>x.trim()).filter(Boolean),is_published:form.isPublished,is_featured:form.isFeatured,file_path:filePath,image_path:imagePath,thumbnail_url:imagePath?publicImageUrl(imagePath):editingResource?.thumbnail_url||null,organization_logo_url:organizationLogoUrl||null,organization_logo_path:organizationLogoPath||null,published_at:publishedAt,updated_at:new Date().toISOString()};
+      if(isNew){if(!filePath)throw new Error("New resource ke liye PDF required hai.");const {error:e1}=await supabase.from("resources").insert(payload);if(e1)throw e1;setMessage(form.isPublished?"Job published successfully.":"Draft created successfully.")}
       else{const {error:e2}=await supabase.from("resources").update(payload).eq("id",editingResource.id);if(e2)throw e2;setMessage("Job updated successfully. Public page automatically update ho gaya.")}
       await loadAll();setShowResourceModal(false);
     }catch(err){setError(err.message||"Save failed.")}finally{setSaving(false)}
@@ -168,7 +151,7 @@ function Admin() {
 
   async function togglePublish(r){const next=!r.is_published;const patch={is_published:next,updated_at:new Date().toISOString(),published_at:next?(r.published_at||new Date().toISOString()):null};const {error:e}=await supabase.from("resources").update(patch).eq("id",r.id);if(e)setError(e.message);else{setMessage(next?"Published":"Moved to draft");loadAll()}}
   async function toggleFeatured(r){const {error:e}=await supabase.from("resources").update({is_featured:!r.is_featured,updated_at:new Date().toISOString()}).eq("id",r.id);if(e)setError(e.message);else loadAll()}
-  async function deleteResource(r){if(!window.confirm(`Delete “${r.title||"this resource"}”?`))return;setError("");if(r.file_path)await supabase.storage.from("resources").remove([r.file_path]);if(r.image_path)await supabase.storage.from("resource-thumbnails").remove([r.image_path]);const {error:e}=await supabase.from("resources").delete().eq("id",r.id);if(e)setError(e.message);else{setMessage("Resource deleted");loadAll()}}
+  async function deleteResource(r){if(!window.confirm(`Delete “${r.title||"this resource"}”?`))return;setError("");if(r.file_path)await supabase.storage.from("resources").remove([r.file_path]);if(r.image_path)await supabase.storage.from("resource-thumbnails").remove([r.image_path]);if(r.organization_logo_path)await supabase.storage.from("resource-thumbnails").remove([r.organization_logo_path]);const {error:e}=await supabase.from("resources").delete().eq("id",r.id);if(e)setError(e.message);else{setMessage("Resource deleted");loadAll()}}
   async function previewFile(r){if(!r.file_path)return setError("PDF available nahi hai.");const {data,error:e}=await supabase.storage.from("resources").createSignedUrl(r.file_path,300);if(e)setError(e.message);else if(data?.signedUrl)window.open(data.signedUrl,"_blank","noopener,noreferrer")}
 
   function openAddPromotion(){setEditingPromotion(null);setPromotion({title:"",subtitle:"",description:"",image:null,imageUrl:"",buttonText:"View Now",buttonUrl:"",placement:"sidebar",displayOrder:0,isActive:true,startAt:"",endAt:""});setShowPromotionModal(true)}
@@ -201,9 +184,9 @@ function Admin() {
 
     {showResourceModal&&<div className="modal-backdrop"><div className="builder-modal"><div className="modal-header"><div><span>JOB BUILDER</span><h2>{editingResource?'Edit Government Job':'Create Government Job'}</h2></div><button onClick={closeResource}><X/></button></div><form onSubmit={saveResource}>
       {!editingResource&&<section className="builder-import"><div><Sparkles/><div><strong>Smart Paste Builder</strong><p>Notification/page se copied details yahan paste karo. Builder common labels aur URLs ko automatically fields me fill karega.</p></div></div><textarea value={jobBuilderText} onChange={e=>setJobBuilderText(e.target.value)} placeholder={'Example:\nPost Name: SSC CHSL 2026\nOrganization: Staff Selection Commission\nTotal Vacancies: 3712\nQualification: 12th Pass\nAge Limit: 18-27 Years\nLast Date: 18/07/2026\nApply Online: https://example.com/apply\nNotification: https://example.com/notification'}/><button type="button" className="secondary-button" onClick={applyBuilder} disabled={!jobBuilderText.trim()}><Sparkles/> Auto Fill Details</button></section>}
-      <div className="builder-grid"><section className="builder-section"><h3>01 • Basic Information</h3><label>Job Title<input value={form.title} onChange={e=>setForm({...form,title:e.target.value})}/></label><div className="two"><label>Organization<input value={form.organization} onChange={e=>setForm({...form,organization:e.target.value})}/></label><label>Post Name<input value={form.postName} onChange={e=>setForm({...form,postName:e.target.value})}/></label></div><div className="two"><label>Job Category<select value={form.jobCategory} onChange={e=>setForm({...form,jobCategory:e.target.value})}>{JOB_CATEGORIES.map(x=><option key={x}>{x}</option>)}</select></label><label>Vacancies<input value={form.totalVacancies} onChange={e=>setForm({...form,totalVacancies:e.target.value})}/></label></div><label>Short Description<textarea rows="3" value={form.shortDescription} onChange={e=>setForm({...form,shortDescription:e.target.value})}/></label><label>Full Description<textarea rows="7" value={form.fullDescription} onChange={e=>setForm({...form,fullDescription:e.target.value})}/></label></section>
+      <div className="builder-grid"><section className="builder-section"><h3>01 • Basic Information</h3><label>Job Title<input value={form.title} onChange={e=>setForm({...form,title:e.target.value})} required/></label><div className="two"><label>Organization<input value={form.organization} onChange={e=>setForm({...form,organization:e.target.value})}/></label><label>Post Name<input value={form.postName} onChange={e=>setForm({...form,postName:e.target.value})}/></label></div><div className="two"><label>Job Category<select value={form.jobCategory} onChange={e=>setForm({...form,jobCategory:e.target.value})}>{JOB_CATEGORIES.map(x=><option key={x}>{x}</option>)}</select></label><label>Vacancies<input value={form.totalVacancies} onChange={e=>setForm({...form,totalVacancies:e.target.value})}/></label></div><label>Short Description<textarea rows="3" value={form.shortDescription} onChange={e=>setForm({...form,shortDescription:e.target.value})}/></label><label>Full Description<textarea rows="7" value={form.fullDescription} onChange={e=>setForm({...form,fullDescription:e.target.value})}/></label></section>
       <section className="builder-section"><h3>02 • Eligibility & Dates</h3><label>Qualification<input value={form.qualification} onChange={e=>setForm({...form,qualification:e.target.value})}/></label><div className="two"><label>Age Limit<input value={form.ageLimit} onChange={e=>setForm({...form,ageLimit:e.target.value})}/></label><label>Application Fee<input value={form.applicationFee} onChange={e=>setForm({...form,applicationFee:e.target.value})}/></label></div><div className="two"><label>Job Location<input value={form.jobLocation} onChange={e=>setForm({...form,jobLocation:e.target.value})}/></label><label>Start Date<input type="date" value={form.applicationStartDate} onChange={e=>setForm({...form,applicationStartDate:e.target.value})}/></label></div><label>Last Date<input type="date" value={form.lastDate} onChange={e=>setForm({...form,lastDate:e.target.value})}/></label><div className="two"><label>Apply URL<input type="url" value={form.applyUrl} onChange={e=>setForm({...form,applyUrl:e.target.value})} placeholder="https://..."/></label><label>Notification URL<input type="url" value={form.notificationUrl} onChange={e=>setForm({...form,notificationUrl:e.target.value})} placeholder="https://..."/></label></div><label>Official Website URL<input type="url" value={form.officialWebsiteUrl} onChange={e=>setForm({...form,officialWebsiteUrl:e.target.value})} placeholder="https://..."/></label></section>
-      <section className="builder-section"><h3>03 • Media & Access</h3><label className="upload-box"><UploadCloud/><strong>{form.file?.name|| (editingResource?.file_path?'Existing PDF saved • click to replace':'Upload Notification PDF')}</strong><small>PDF only • max 20 MB</small><input type="file" accept="application/pdf" onChange={e=>setForm({...form,file:e.target.files?.[0]||null})}/></label><label className="upload-box"><ImageIcon/><strong>{form.image?.name|| (editingResource?.image_path?'Existing thumbnail saved • click to replace':'Upload Job Thumbnail')}</strong><small>PNG/JPG/WebP • max 5 MB</small><input type="file" accept="image/*" onChange={e=>setForm({...form,image:e.target.files?.[0]||null})}/></label><label>Tags<input value={form.tags} onChange={e=>setForm({...form,tags:e.target.value})} placeholder="SSC, CHSL, 2026"/></label><div className="switches"><label className="check-row"><input type="checkbox" checked={form.isPublished} onChange={e=>setForm({...form,isPublished:e.target.checked})}/><span>Publish on public website</span></label><label className="check-row"><input type="checkbox" checked={form.isFeatured} onChange={e=>setForm({...form,isFeatured:e.target.checked})}/><span>Featured job</span></label></div></section></div>
+      <section className="builder-section"><h3>03 • Media & Access</h3><label className="upload-box"><UploadCloud/><strong>{form.file?.name|| (editingResource?.file_path?'Existing PDF saved • click to replace':'Upload Notification PDF')}</strong><small>PDF only • max 20 MB</small><input type="file" accept="application/pdf" onChange={e=>setForm({...form,file:e.target.files?.[0]||null})}/></label><label className="upload-box"><ImageIcon/><strong>{form.image?.name|| (editingResource?.image_path?'Existing thumbnail saved • click to replace':'Upload Job Thumbnail')}</strong><small>PNG/JPG/WebP • max 5 MB</small><input type="file" accept="image/*" onChange={e=>setForm({...form,image:e.target.files?.[0]||null})}/></label><label className="upload-box"><ShieldCheck/><strong>{form.organizationLogo?.name|| (form.organizationLogoUrl?'Organization logo saved • click to replace':'Upload Organization Logo')}</strong><small>PNG/JPG/WebP/GIF • max 2 MB • Optional</small><input type="file" accept="image/png,image/jpeg,image/webp,image/gif" onChange={e=>setForm({...form,organizationLogo:e.target.files?.[0]||null})}/></label><label>Tags<input value={form.tags} onChange={e=>setForm({...form,tags:e.target.value})} placeholder="SSC, CHSL, 2026"/></label><div className="switches"><label className="check-row"><input type="checkbox" checked={form.isPublished} onChange={e=>setForm({...form,isPublished:e.target.checked})}/><span>Publish on public website</span></label><label className="check-row"><input type="checkbox" checked={form.isFeatured} onChange={e=>setForm({...form,isFeatured:e.target.checked})}/><span>Featured job</span></label></div></section></div>
       {error&&<div className="admin-error">{error}</div>}<div className="modal-actions"><button type="button" className="secondary-button" onClick={closeResource}>Cancel</button><button className="admin-primary-button" disabled={saving}>{saving?'Saving...':editingResource?'Save Changes':'Create Job'}</button></div>
     </form></div></div>}
 
