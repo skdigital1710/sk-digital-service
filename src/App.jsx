@@ -14,6 +14,7 @@ import SocialFollowGate, { useSocialFollowGate } from "./SocialFollowGate";
 const WA_FALLBACK = "https://whatsapp.com/channel/0029Vb6H3cS1SWsyxdVo471w";
 const IG_FALLBACK = "https://instagram.com/skdigitalservice.dhule";
 const YT_FALLBACK = "https://youtube.com/@skdigitalservice-t9u";
+const EBOOK_URL = "https://qsaim.gumroad.com/l/ai-career-system";
 const JOB_CATS = [
   ["Latest Jobs","latest",Flame,"#ff7a00"],
   ["SSC","ssc",GraduationCap,"#0b63d6"],
@@ -69,7 +70,115 @@ function Promotion({p,compact=false}){
     <div className="promo-overlay"><small>{p.subtitle||"SK DIGITAL SERVICE"}</small><h3>{p.title}</h3>{p.description&&<p>{p.description}</p>}{u&&<a href={u} target="_blank" rel="noreferrer">{p.button_text||"View Now"} <ArrowRight size={15}/></a>}</div>
   </div>;
 }
+function EbookPromo(){
+  return (
+    <section className="ebook-section">
+      <div className="ebook-glow ebook-glow-one"/>
+      <div className="ebook-glow ebook-glow-two"/>
 
+      <div className="ebook-inner">
+
+        <div className="ebook-cover-wrap">
+          <div className="ebook-cover-card">
+
+            <div className="ebook-cover-top">
+              <span>AI CAREER SYSTEM</span>
+              <Sparkles size={18}/>
+            </div>
+
+            <div className="ebook-cover-main">
+              <small>PRACTICAL GUIDE</small>
+
+              <h3>
+                Build Your
+                <br/>
+                Career With AI
+              </h3>
+
+              <p>
+                Job Search • Resume • LinkedIn
+                <br/>
+                Interviews • Career Growth
+              </p>
+            </div>
+
+            <div className="ebook-cover-bottom">
+              <b>SK DIGITAL SERVICE</b>
+              <span>AI-Powered Career System</span>
+            </div>
+
+          </div>
+
+          <div className="ebook-floating-badge">
+            <Sparkles size={14}/>
+            <span>Digital eBook</span>
+          </div>
+        </div>
+
+        <div className="ebook-copy">
+
+          <span className="ebook-kicker">
+            <Sparkles size={14}/>
+            FEATURED RESOURCE
+          </span>
+
+          <h2>
+            AI CAREER
+            <mark>SYSTEM</mark>
+          </h2>
+
+          <p className="ebook-subtitle">
+            A Practical Guide to Using AI for Job Search,
+            Resumes, LinkedIn, Interviews & Career Growth
+          </p>
+
+          <p className="ebook-description">
+            A practical step-by-step system for using AI throughout
+            your career journey — from finding the right role to
+            building applications, improving your resume and preparing
+            for interviews.
+          </p>
+
+          <div className="ebook-features">
+            <span><CheckCircle2/> Career Direction</span>
+            <span><CheckCircle2/> Job Search</span>
+            <span><CheckCircle2/> ATS-Friendly Resume</span>
+            <span><CheckCircle2/> LinkedIn</span>
+            <span><CheckCircle2/> Recruiter Messages</span>
+            <span><CheckCircle2/> Interview Preparation</span>
+          </div>
+
+          <div className="ebook-buy-row">
+
+            <div className="ebook-price">
+              <small>LAUNCH PRICE</small>
+              <strong>$5</strong>
+              <span>One-time payment</span>
+            </div>
+
+            <a
+              className="ebook-buy-btn"
+              href={EBOOK_URL}
+              target="_blank"
+              rel="noreferrer"
+            >
+              Get the eBook
+              <ArrowRight size={19}/>
+            </a>
+
+          </div>
+
+          <div className="ebook-trust">
+            <ShieldCheck size={16}/>
+            <span>Instant digital access • English Edition</span>
+          </div>
+
+        </div>
+
+      </div>
+    </section>
+  );
+}
 function Header({search,setSearch,openMenu=false,onMenu,dark,onToggleTheme}){
   return <header className="site-header"><div className="shell header-inner">
     <a className="brand" href="/" onClick={e=>{if(location.pathname!=="/"){e.preventDefault();history.pushState({}, "", "/");window.dispatchEvent(new PopStateEvent("popstate"));}}}><Logo/><span>SK DIGITAL SERVICE<small>Government & Online Services</small></span></a>
@@ -193,7 +302,15 @@ export default function App(){
         </div>
         <div>{nearest?<CountdownCard job={nearest} wa={wa}/>:<div className="countdown-card empty"><h3>Latest Government Jobs</h3><p>New verified updates will appear here.</p><a className="wa-hero" href={wa} target="_blank" rel="noreferrer"><MessageCircle/> <b>Join WhatsApp Channel</b><ArrowRight/></a></div>}</div>
       </div></section>
-      {topPromos.length>0&&<section className="shell promo-row">{topPromos.map(p=><Promotion p={p} key={p.id}/>)}</section>}
+      {topPromos.length>0&&
+  <section className="shell promo-row">
+    {topPromos.map(p=><Promotion p={p} key={p.id}/>)}
+  </section>
+}
+
+<EbookPromo/>
+
+<section id="categories" className="shell category-row">
       <section id="categories" className="shell category-row">{JOB_CATS.map(([name,slug,Icon,color])=><button key={slug} className={selectedCat===slug?"selected":""} onClick={()=>setSelectedCat(slug)}><span style={{background:color+"1a",color}}><Icon size={24}/></span><b>{name}</b></button>)}</section>
       <section id="latest" className="shell content-layout"><div className="jobs-panel"><div className="panel-heading"><div><span><Flame size={11}/> {selectedCat==="latest"?"Latest Jobs":"Government Jobs"}</span><h2>{selectedCat==="latest"?"Latest Jobs":JOB_CATS.find(x=>x[1]===selectedCat)?.[0]||"Jobs"}</h2><p>{selectedCat==="latest"?"Recently Published Jobs (Newest First)":"Latest published updates in this category"}</p></div><button onClick={()=>setSelectedCat("latest")}>View All <ArrowRight size={16}/></button></div>{loading?<div className="empty-state">Loading latest jobs…</div>:filtered.length?<div className="job-list">{filtered.slice(0,8).map(r=><JobCard key={r.id} r={r} onOpen={openJob}/>)}</div>:<div className="empty-state">No published jobs found.</div>}{filtered.length>8&&<button className="view-all-btn" onClick={()=>setSelectedCat(selectedCat)}>View All Jobs <ArrowRight/></button>}</div><aside className="side-panel">
         <div className="quick-links"><h3><Link2 size={15}/> Quick Links</h3>{[["Apply Online","#latest"],["Download Notification","#latest"],["Official Website","#about"],["Syllabus & Exam Pattern","#resources"],["Previous Year Papers","#resources"],["Admit Card","#latest"],["Result","#latest"],["Important Documents","#resources"]].map(([x,u])=><a href={u} key={x}>{x}<ChevronRight size={15}/></a>)}</div>
