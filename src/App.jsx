@@ -344,174 +344,174 @@ function Promotion({ p, compact = false }) {
 }
 
 /* =========================================================
-   AI CAREER SYSTEM EBOOK PROMOTION
+   FEATURED PRODUCTS
    ========================================================= */
 
-function EbookPromo() {
+function ProductsSection() {
+  const cardStyle = {
+    background: "rgba(255,255,255,0.96)",
+    color: "#12213a",
+    border: "1px solid rgba(18,99,214,0.16)",
+    borderRadius: "24px",
+    padding: "clamp(20px, 3vw, 32px)",
+    boxShadow: "0 18px 48px rgba(12, 55, 115, 0.12)",
+    display: "flex",
+    flexDirection: "column",
+    minWidth: 0
+  };
+
+  const buttonStyle = {
+    display: "inline-flex",
+    alignItems: "center",
+    justifyContent: "center",
+    gap: "10px",
+    width: "100%",
+    boxSizing: "border-box",
+    borderRadius: "14px",
+    padding: "14px 18px",
+    background: "linear-gradient(135deg, #075fe4, #0a3b91)",
+    color: "#fff",
+    fontWeight: 800,
+    textDecoration: "none",
+    border: 0,
+    cursor: "pointer"
+  };
+
   return (
-    <section className="ebook-section">
-
-      <div className="ebook-glow ebook-glow-one" />
-      <div className="ebook-glow ebook-glow-two" />
-
-      <div className="ebook-inner">
-
-        {/* EBOOK COVER */}
-        <div className="ebook-cover-wrap">
-
-          <div className="ebook-cover-card">
-
-            <div className="ebook-cover-top">
-              <span>
-                AI CAREER SYSTEM
-              </span>
-
-              <Sparkles size={18} />
-            </div>
-
-            <div className="ebook-cover-main">
-
-              <small>
-                PRACTICAL GUIDE
-              </small>
-
-              <h3>
-                Build Your
-                <br />
-                Career With AI
-              </h3>
-
-              <p>
-                Job Search • Resume • LinkedIn
-                <br />
-                Interviews • Career Growth
-              </p>
-
-            </div>
-
-            <div className="ebook-cover-bottom">
-
-              <b>
-                SK DIGITAL SERVICE
-              </b>
-
-              <span>
-                AI-Powered Career System
-              </span>
-
-            </div>
-
-          </div>
-
-          <div className="ebook-floating-badge">
-            <Sparkles size={14} />
-            <span>
-              Digital eBook
-            </span>
-          </div>
-
-        </div>
-
-        {/* EBOOK CONTENT */}
-        <div className="ebook-copy">
-
-          <span className="ebook-kicker">
-            <Sparkles size={14} />
-            FEATURED RESOURCE
+    <section
+      id="products"
+      style={{
+        position: "relative",
+        overflow: "hidden",
+        padding: "clamp(34px, 6vw, 72px) 20px",
+        margin: "28px auto",
+        background: "linear-gradient(135deg, #edf5ff 0%, #ffffff 48%, #fff3e7 100%)",
+        borderTop: "1px solid #dbeafe",
+        borderBottom: "1px solid #dbeafe"
+      }}
+    >
+      <div style={{ maxWidth: "1180px", margin: "0 auto", position: "relative" }}>
+        <div style={{ textAlign: "center", margin: "0 auto 30px", maxWidth: "720px" }}>
+          <span style={{
+            display: "inline-flex", alignItems: "center", gap: "8px",
+            borderRadius: "999px", padding: "8px 14px",
+            color: "#0754bd", background: "#dcecff",
+            fontSize: "12px", fontWeight: 900, letterSpacing: "1.4px"
+          }}>
+            <Sparkles size={15} /> SK DIGITAL SERVICE STORE
           </span>
-
-          <h2>
-            AI CAREER
-            <mark>SYSTEM</mark>
+          <h2 style={{
+            margin: "16px 0 10px", fontSize: "clamp(30px, 5vw, 48px)",
+            lineHeight: 1.08, letterSpacing: "-1.4px", color: "#10213e"
+          }}>
+            Explore Our <span style={{ color: "#075fe4" }}>Products</span>
           </h2>
-
-          <p className="ebook-subtitle">
-            A Practical Guide to Using AI
-            for Job Search, Resumes,
-            LinkedIn, Interviews & Career Growth
+          <p style={{ margin: 0, color: "#52627a", fontSize: "16px", lineHeight: 1.7 }}>
+            Practical digital guides and learning resources from SK DIGITAL SERVICE.
           </p>
-
-          <p className="ebook-description">
-            A practical step-by-step system
-            for using AI throughout your career
-            journey — from finding the right role
-            to building applications, improving
-            your resume and preparing for interviews.
-          </p>
-
-          <div className="ebook-features">
-
-            <span>
-              <CheckCircle2 />
-              Career Direction
-            </span>
-
-            <span>
-              <CheckCircle2 />
-              Job Search
-            </span>
-
-            <span>
-              <CheckCircle2 />
-              ATS-Friendly Resume
-            </span>
-
-            <span>
-              <CheckCircle2 />
-              LinkedIn
-            </span>
-
-            <span>
-              <CheckCircle2 />
-              Recruiter Messages
-            </span>
-
-            <span>
-              <CheckCircle2 />
-              Interview Preparation
-            </span>
-
-          </div>
-
-          <div className="ebook-buy-row">
-
-            <div className="ebook-price">
-              <small>
-                LAUNCH PRICE
-              </small>
-
-              <strong>
-                $5
-              </strong>
-
-              <span>
-                One-time payment
-              </span>
-            </div>
-
-            <a
-              className="ebook-buy-btn"
-              href={EBOOK_URL}
-              target="_blank"
-              rel="noreferrer"
-            >
-              Get the eBook
-              <ArrowRight size={19} />
-            </a>
-
-          </div>
-
-          <div className="ebook-trust">
-            <ShieldCheck size={16} />
-
-            <span>
-              Instant digital access •
-              English Edition
-            </span>
-          </div>
-
         </div>
 
+        <div style={{
+          display: "grid",
+          gridTemplateColumns: "repeat(auto-fit, minmax(min(100%, 300px), 1fr))",
+          gap: "22px",
+          alignItems: "stretch"
+        }}>
+          <article style={{
+            ...cardStyle,
+            border: "2px solid #82b7ff",
+            background: "linear-gradient(145deg, #ffffff 0%, #f2f8ff 100%)"
+          }}>
+            <div style={{
+              display: "flex", justifyContent: "space-between", alignItems: "center",
+              gap: "12px", marginBottom: "22px"
+            }}>
+              <span style={{
+                background: "#dcecff", color: "#0754bd", padding: "7px 11px",
+                borderRadius: "999px", fontSize: "11px", fontWeight: 900, letterSpacing: ".8px"
+              }}>FEATURED EBOOK</span>
+              <span style={{ color: "#f59e0b", fontSize: "13px", fontWeight: 900 }}>DIGITAL GUIDE</span>
+            </div>
+
+            <div style={{
+              minHeight: "180px", borderRadius: "18px", padding: "24px",
+              color: "#fff", background: "radial-gradient(circle at top right, #347df4, transparent 45%), linear-gradient(135deg, #071b45, #075fe4)",
+              display: "flex", flexDirection: "column", justifyContent: "space-between",
+              boxShadow: "inset 0 0 0 1px rgba(255,255,255,.18)"
+            }}>
+              <div style={{ fontSize: "12px", fontWeight: 900, letterSpacing: "1.8px" }}>SK DIGITAL SERVICE</div>
+              <div>
+                <div style={{ fontSize: "clamp(25px, 4vw, 34px)", fontWeight: 950, lineHeight: 1.05 }}>AI CAREER<br />SYSTEM</div>
+                <div style={{ marginTop: "10px", fontSize: "12px", color: "#dbeafe" }}>JOB SEARCH • RESUME • LINKEDIN • INTERVIEWS</div>
+              </div>
+            </div>
+
+            <h3 style={{ margin: "22px 0 8px", fontSize: "23px", lineHeight: 1.2 }}>
+              AI CAREER SYSTEM
+            </h3>
+            <p style={{ margin: "0 0 18px", color: "#52627a", lineHeight: 1.65 }}>
+              A practical guide to using AI for job search, resumes, LinkedIn, interviews and career growth.
+            </p>
+            <div style={{ marginTop: "auto" }}>
+              <div style={{ display: "flex", alignItems: "baseline", gap: "10px", marginBottom: "16px" }}>
+                <strong style={{ fontSize: "30px", color: "#0754bd" }}>$5</strong>
+                <span style={{ color: "#66758b", fontSize: "13px" }}>One-time payment</span>
+              </div>
+              <a href={EBOOK_URL} target="_blank" rel="noreferrer" style={buttonStyle}>
+                Get the eBook <ArrowRight size={18} />
+              </a>
+            </div>
+          </article>
+
+          <article style={{
+            ...cardStyle,
+            border: "2px solid #ffd19a",
+            background: "linear-gradient(145deg, #ffffff 0%, #fff8ef 100%)"
+          }}>
+            <div style={{
+              display: "flex", justifyContent: "space-between", alignItems: "center",
+              gap: "12px", marginBottom: "22px"
+            }}>
+              <span style={{
+                background: "#fff0d9", color: "#a65300", padding: "7px 11px",
+                borderRadius: "999px", fontSize: "11px", fontWeight: 900, letterSpacing: ".8px"
+              }}>NEW LEARNING PRODUCT</span>
+              <span style={{ color: "#e8790c", fontSize: "13px", fontWeight: 900 }}>AGES 3–5</span>
+            </div>
+
+            <div style={{
+              minHeight: "180px", borderRadius: "18px", padding: "24px",
+              color: "#512d0a", background: "radial-gradient(circle at top right, #ffe49a, transparent 44%), linear-gradient(135deg, #fff0c7, #ffcf83)",
+              display: "flex", flexDirection: "column", justifyContent: "space-between",
+              boxShadow: "inset 0 0 0 1px rgba(255,255,255,.7)"
+            }}>
+              <div style={{ fontSize: "12px", fontWeight: 900, letterSpacing: "1.4px" }}>SK DIGITAL SERVICE • KIDS</div>
+              <div>
+                <div style={{ fontSize: "clamp(24px, 4vw, 32px)", fontWeight: 950, lineHeight: 1.08 }}>ACTIVITY<br />WORKBOOK</div>
+                <div style={{ marginTop: "10px", fontSize: "12px", fontWeight: 800 }}>LETTERS • NUMBERS • SHAPES</div>
+              </div>
+            </div>
+
+            <h3 style={{ margin: "22px 0 8px", fontSize: "23px", lineHeight: 1.2 }}>
+              Kids Activity & Tracing Book
+            </h3>
+            <p style={{ margin: "0 0 18px", color: "#52627a", lineHeight: 1.65 }}>
+              Printable early-learning practice for little learners, designed to make learning letters, numbers and shapes fun.
+            </p>
+            <div style={{ marginTop: "auto" }}>
+              <div style={{ marginBottom: "16px", color: "#a65300", fontSize: "13px", fontWeight: 800 }}>
+                Printable digital PDF
+              </div>
+              <div style={{
+                borderRadius: "14px", padding: "13px 15px", textAlign: "center",
+                color: "#87501b", background: "#fff0d9", fontWeight: 800,
+                border: "1px dashed #e9ae60"
+              }}>
+                Buy link will be activated after you add the product URL
+              </div>
+            </div>
+          </article>
+        </div>
       </div>
     </section>
   );
@@ -583,6 +583,10 @@ function Header({
 
           <a href="#categories">
             ▦ <span>All Categories</span>
+          </a>
+
+          <a href="#products">
+            ✦ <span>Products</span>
           </a>
 
           <a href="#resources">
@@ -2176,10 +2180,10 @@ export default function App() {
           )}
 
           {/* =================================================
-              AI CAREER SYSTEM EBOOK
+              FEATURED PRODUCTS
           ================================================= */}
 
-          <EbookPromo />
+          <ProductsSection />
 
           {/* =================================================
               JOB CATEGORIES
