@@ -348,176 +348,50 @@ function Promotion({ p, compact = false }) {
    ========================================================= */
 
 function ProductsSection() {
-  const cardStyle = {
-    background: "rgba(255,255,255,0.96)",
-    color: "#12213a",
-    border: "1px solid rgba(18,99,214,0.16)",
-    borderRadius: "24px",
-    padding: "clamp(20px, 3vw, 32px)",
-    boxShadow: "0 18px 48px rgba(12, 55, 115, 0.12)",
-    display: "flex",
-    flexDirection: "column",
-    minWidth: 0
-  };
-
   const buttonStyle = {
-    display: "inline-flex",
-    alignItems: "center",
-    justifyContent: "center",
-    gap: "10px",
-    width: "100%",
-    boxSizing: "border-box",
-    borderRadius: "14px",
-    padding: "14px 18px",
-    background: "linear-gradient(135deg, #075fe4, #0a3b91)",
-    color: "#fff",
-    fontWeight: 800,
-    textDecoration: "none",
-    border: 0,
-    cursor: "pointer"
+    display: "inline-flex", alignItems: "center", justifyContent: "center", gap: 10,
+    width: "100%", boxSizing: "border-box", borderRadius: 14, padding: "14px 18px",
+    background: "linear-gradient(135deg, #075fe4, #0a3b91)", color: "#fff",
+    fontWeight: 800, textDecoration: "none", border: 0, cursor: "pointer"
   };
-
   return (
-    <section
-      id="products"
-      style={{
-        position: "relative",
-        overflow: "hidden",
-        padding: "clamp(34px, 6vw, 72px) 20px",
-        margin: "28px auto",
-        background: "linear-gradient(135deg, #edf5ff 0%, #ffffff 48%, #fff3e7 100%)",
-        borderTop: "1px solid #dbeafe",
-        borderBottom: "1px solid #dbeafe"
-      }}
-    >
-      <div style={{ maxWidth: "1180px", margin: "0 auto", position: "relative" }}>
-        <div style={{ textAlign: "center", margin: "0 auto 30px", maxWidth: "720px" }}>
-          <span style={{
-            display: "inline-flex", alignItems: "center", gap: "8px",
-            borderRadius: "999px", padding: "8px 14px",
-            color: "#0754bd", background: "#dcecff",
-            fontSize: "12px", fontWeight: 900, letterSpacing: "1.4px"
-          }}>
-            <Sparkles size={15} /> SK DIGITAL SERVICE STORE
-          </span>
-          <h2 style={{
-            margin: "16px 0 10px", fontSize: "clamp(30px, 5vw, 48px)",
-            lineHeight: 1.08, letterSpacing: "-1.4px", color: "#10213e"
-          }}>
-            Explore Our <span style={{ color: "#075fe4" }}>Products</span>
-          </h2>
-          <p style={{ margin: 0, color: "#52627a", fontSize: "16px", lineHeight: 1.7 }}>
-            Practical digital guides and learning resources from SK DIGITAL SERVICE.
-          </p>
+    <section id="products" style={{ padding: "clamp(34px, 6vw, 72px) 20px", margin: "28px auto", background: "linear-gradient(135deg,#edf5ff,#fff 55%,#fff3e7)", borderTop: "1px solid #dbeafe", borderBottom: "1px solid #dbeafe" }}>
+      <div style={{ maxWidth: 1080, margin: "0 auto", display: "grid", gridTemplateColumns: "repeat(auto-fit,minmax(min(100%,330px),1fr))", gap: 28, alignItems: "center" }}>
+        <div>
+          <span style={{ display: "inline-flex", borderRadius: 999, padding: "8px 13px", color: "#a65300", background: "#fff0d9", fontSize: 12, fontWeight: 900, letterSpacing: 1 }}>✦ LATEST PRODUCT</span>
+          <h2 style={{ margin: "16px 0 12px", fontSize: "clamp(30px,4vw,46px)", lineHeight: 1.08, color: "#10213e", letterSpacing: "-1px" }}>Kids Activity &amp; <span style={{ color: "#075fe4" }}>Tracing Book</span></h2>
+          <p style={{ color: "#52627a", fontSize: 16, lineHeight: 1.7, margin: "0 0 18px" }}>Fun printable learning for little learners — tracing, coloring, letters, numbers and shapes.</p>
+          <div style={{ display: "flex", gap: 10, flexWrap: "wrap", marginBottom: 22, color: "#29446b", fontSize: 14 }}><span>✏️ Tracing</span><span>•</span><span>🖍️ Coloring</span><span>•</span><span>🔢 Numbers</span></div>
+          <div style={{ display: "flex", alignItems: "center", gap: 16, flexWrap: "wrap" }}><strong style={{ fontSize: 32, color: "#0754bd" }}>$2.99</strong><a href="https://qsaim.gumroad.com/l/kids-activity-book" target="_blank" rel="noreferrer" style={{ ...buttonStyle, width: "auto", minWidth: 150 }}>Buy Now <ArrowRight size={18}/></a></div>
+          <a href="/products" style={{ display: "inline-flex", alignItems: "center", gap: 8, marginTop: 22, padding: "12px 18px", border: "1px solid #7aaeff", borderRadius: 14, color: "#0754bd", fontWeight: 800, textDecoration: "none", background: "#fff" }}>View All Products <ArrowRight size={17}/></a>
         </div>
-
-        <div style={{
-          display: "grid",
-          gridTemplateColumns: "repeat(auto-fit, minmax(min(100%, 300px), 1fr))",
-          gap: "22px",
-          alignItems: "stretch"
-        }}>
-          <article style={{
-            ...cardStyle,
-            border: "2px solid #82b7ff",
-            background: "linear-gradient(145deg, #ffffff 0%, #f2f8ff 100%)"
-          }}>
-            <div style={{
-              display: "flex", justifyContent: "space-between", alignItems: "center",
-              gap: "12px", marginBottom: "22px"
-            }}>
-              <span style={{
-                background: "#dcecff", color: "#0754bd", padding: "7px 11px",
-                borderRadius: "999px", fontSize: "11px", fontWeight: 900, letterSpacing: ".8px"
-              }}>FEATURED EBOOK</span>
-              <span style={{ color: "#f59e0b", fontSize: "13px", fontWeight: 900 }}>DIGITAL GUIDE</span>
-            </div>
-
-            <div style={{
-              minHeight: "180px", borderRadius: "18px", padding: "24px",
-              color: "#fff", background: "radial-gradient(circle at top right, #347df4, transparent 45%), linear-gradient(135deg, #071b45, #075fe4)",
-              display: "flex", flexDirection: "column", justifyContent: "space-between",
-              boxShadow: "inset 0 0 0 1px rgba(255,255,255,.18)"
-            }}>
-              <div style={{ fontSize: "12px", fontWeight: 900, letterSpacing: "1.8px" }}>SK DIGITAL SERVICE</div>
-              <div>
-                <div style={{ fontSize: "clamp(25px, 4vw, 34px)", fontWeight: 950, lineHeight: 1.05 }}>AI CAREER<br />SYSTEM</div>
-                <div style={{ marginTop: "10px", fontSize: "12px", color: "#dbeafe" }}>JOB SEARCH • RESUME • LINKEDIN • INTERVIEWS</div>
-              </div>
-            </div>
-
-            <h3 style={{ margin: "22px 0 8px", fontSize: "23px", lineHeight: 1.2 }}>
-              AI CAREER SYSTEM
-            </h3>
-            <p style={{ margin: "0 0 18px", color: "#52627a", lineHeight: 1.65 }}>
-              A practical guide to using AI for job search, resumes, LinkedIn, interviews and career growth.
-            </p>
-            <div style={{ marginTop: "auto" }}>
-              <div style={{ display: "flex", alignItems: "baseline", gap: "10px", marginBottom: "16px" }}>
-                <strong style={{ fontSize: "30px", color: "#0754bd" }}>$5</strong>
-                <span style={{ color: "#66758b", fontSize: "13px" }}>One-time payment</span>
-              </div>
-              <a href={EBOOK_URL} target="_blank" rel="noreferrer" style={buttonStyle}>
-                Get the eBook <ArrowRight size={18} />
-              </a>
-            </div>
-          </article>
-
-          <article style={{
-            ...cardStyle,
-            border: "2px solid #ffd19a",
-            background: "linear-gradient(145deg, #ffffff 0%, #fff8ef 100%)"
-          }}>
-            <div style={{
-              display: "flex", justifyContent: "space-between", alignItems: "center",
-              gap: "12px", marginBottom: "22px"
-            }}>
-              <span style={{
-                background: "#fff0d9", color: "#a65300", padding: "7px 11px",
-                borderRadius: "999px", fontSize: "11px", fontWeight: 900, letterSpacing: ".8px"
-              }}>NEW LEARNING PRODUCT</span>
-              <span style={{ color: "#e8790c", fontSize: "13px", fontWeight: 900 }}>AGES 3–5</span>
-            </div>
-
-            <div style={{
-              minHeight: "180px", borderRadius: "18px", padding: "24px",
-              color: "#512d0a", background: "radial-gradient(circle at top right, #ffe49a, transparent 44%), linear-gradient(135deg, #fff0c7, #ffcf83)",
-              display: "flex", flexDirection: "column", justifyContent: "space-between",
-              boxShadow: "inset 0 0 0 1px rgba(255,255,255,.7)"
-            }}>
-              <div style={{ fontSize: "12px", fontWeight: 900, letterSpacing: "1.4px" }}>SK DIGITAL SERVICE • KIDS</div>
-              <div>
-                <div style={{ fontSize: "clamp(24px, 4vw, 32px)", fontWeight: 950, lineHeight: 1.08 }}>ACTIVITY<br />WORKBOOK</div>
-                <div style={{ marginTop: "10px", fontSize: "12px", fontWeight: 800 }}>LETTERS • NUMBERS • SHAPES</div>
-              </div>
-            </div>
-
-            <h3 style={{ margin: "22px 0 8px", fontSize: "23px", lineHeight: 1.2 }}>
-              Kids Activity & Tracing Book
-            </h3>
-            <p style={{ margin: "0 0 18px", color: "#52627a", lineHeight: 1.65 }}>
-              Printable early-learning practice for little learners, designed to make learning letters, numbers and shapes fun.
-            </p>
-            <div style={{ marginTop: "auto" }}>
-              <div style={{ marginBottom: "16px", color: "#a65300", fontSize: "13px", fontWeight: 800 }}>
-                Printable digital PDF
-              </div>
-              <a
-                href="https://qsaim.gumroad.com/l/kids-activity-book"
-                target="_blank"
-                rel="noopener noreferrer"
-                style={{
-                  ...buttonStyle,
-                  background: "linear-gradient(135deg, #f59e0b, #c65d08)"
-                }}
-              >
-                Buy Now <ArrowRight size={18} />
-              </a>
-            </div>
-          </article>
+        <div style={{ background: "rgba(255,255,255,.78)", border: "1px solid #d6e7ff", borderRadius: 24, padding: 14, boxShadow: "0 20px 48px rgba(12,55,115,.12)" }}>
+          <img src="/kids-book-cover.png" alt="Kids Activity and Tracing Book cover with worksheets" style={{ display: "block", width: "100%", maxHeight: 420, objectFit: "contain", borderRadius: 16 }} />
         </div>
       </div>
     </section>
+  );
+}
+
+function AllProductsPage({ onBack }) {
+  const products = [
+    { title: "Kids Activity & Tracing Book", description: "Printable early-learning practice with tracing, coloring, letters, numbers and shapes.", price: "$2.99", image: "/kids-book-cover.png", url: "https://qsaim.gumroad.com/l/kids-activity-book", label: "LATEST PRODUCT" },
+    { title: "AI Career System", description: "A practical guide to using AI for job search, resumes, LinkedIn, interviews and career growth.", price: "$5.00", image: "/ai-career-cover.png", url: EBOOK_URL, label: "DIGITAL GUIDE" }
+  ];
+  return (
+    <div className="public-site" style={{ minHeight: "70vh", background: "linear-gradient(145deg,#f2f7ff,#fff 65%,#fff7ed)", padding: "clamp(24px,5vw,60px) 20px" }}>
+      <div style={{ maxWidth: 1120, margin: "0 auto" }}>
+        <a href="/" onClick={onBack} style={{ color: "#0754bd", textDecoration: "none", fontWeight: 800 }}>← Back to Home</a>
+        <div style={{ margin: "28px 0", display: "flex", alignItems: "end", justifyContent: "space-between", gap: 20, flexWrap: "wrap" }}><div><span style={{ color: "#0754bd", background: "#dcecff", padding: "7px 12px", borderRadius: 999, fontSize: 12, fontWeight: 900 }}>SK DIGITAL SERVICE STORE</span><h1 style={{ color: "#10213e", fontSize: "clamp(34px,5vw,52px)", margin: "16px 0 8px" }}>All Products</h1><p style={{ color: "#52627a", margin: 0 }}>Explore our digital books and learning resources.</p></div><div style={{ color: "#52627a", fontSize: 14 }}>✦ Digital products · Simple one-time pricing</div></div>
+        <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit,minmax(min(100%,320px),1fr))", gap: 24 }}>
+          {products.map(product => <article key={product.title} style={{ background: "#fff", border: "1px solid #dce8f8", borderRadius: 22, padding: 20, boxShadow: "0 14px 36px rgba(12,55,115,.08)", display: "flex", flexDirection: "column" }}>
+            <div style={{ height: 280, borderRadius: 16, background: "#f3f8ff", display: "grid", placeItems: "center", overflow: "hidden", marginBottom: 18 }}><img src={product.image} alt={`${product.title} cover`} style={{ width: "100%", height: "100%", objectFit: "contain" }}/></div>
+            <span style={{ color: "#0754bd", fontSize: 11, fontWeight: 900, letterSpacing: 1 }}>{product.label}</span><h2 style={{ fontSize: 22, color: "#10213e", margin: "8px 0" }}>{product.title}</h2><p style={{ color: "#52627a", lineHeight: 1.65, flex: 1 }}>{product.description}</p>
+            <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", gap: 12, marginTop: 10 }}><strong style={{ fontSize: 28, color: "#0754bd" }}>{product.price}</strong><a href={product.url} target="_blank" rel="noreferrer" style={{ background: "linear-gradient(135deg,#075fe4,#0a3b91)", color: "white", borderRadius: 12, padding: "12px 18px", fontWeight: 800, textDecoration: "none", display: "inline-flex", alignItems: "center", gap: 8 }}>Buy Now <ArrowRight size={17}/></a></div>
+          </article>)}
+        </div>
+      </div>
+    </div>
   );
 }
 
@@ -589,7 +463,7 @@ function Header({
             ▦ <span>All Categories</span>
           </a>
 
-          <a href="#products">
+          <a href="/products">
             ✦ <span>Products</span>
           </a>
 
@@ -1917,6 +1791,10 @@ export default function App() {
         />
       );
     }
+  }
+
+  if (route === "/products") {
+    return <AllProductsPage onBack={(event) => { if (event && event.preventDefault) event.preventDefault(); history.pushState({}, "", "/"); setRoute("/"); window.scrollTo(0, 0); }} />;
   }
 
   /* =======================================================
