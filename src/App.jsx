@@ -347,52 +347,16 @@ function Promotion({ p, compact = false }) {
    FEATURED PRODUCTS
    ========================================================= */
 
-function ProductsSection() {
-  const buttonStyle = {
-    display: "inline-flex", alignItems: "center", justifyContent: "center", gap: 10,
-    width: "100%", boxSizing: "border-box", borderRadius: 14, padding: "14px 18px",
-    background: "linear-gradient(135deg, #075fe4, #0a3b91)", color: "#fff",
-    fontWeight: 800, textDecoration: "none", border: 0, cursor: "pointer"
-  };
-  return (
-    <section id="products" style={{ padding: "clamp(34px, 6vw, 72px) 20px", margin: "28px auto", background: "linear-gradient(135deg,#edf5ff,#fff 55%,#fff3e7)", borderTop: "1px solid #dbeafe", borderBottom: "1px solid #dbeafe" }}>
-      <div style={{ maxWidth: 1080, margin: "0 auto", display: "grid", gridTemplateColumns: "repeat(auto-fit,minmax(min(100%,330px),1fr))", gap: 28, alignItems: "center" }}>
-        <div>
-          <span style={{ display: "inline-flex", borderRadius: 999, padding: "8px 13px", color: "#a65300", background: "#fff0d9", fontSize: 12, fontWeight: 900, letterSpacing: 1 }}>✦ LATEST PRODUCT</span>
-          <h2 style={{ margin: "16px 0 12px", fontSize: "clamp(30px,4vw,46px)", lineHeight: 1.08, color: "#10213e", letterSpacing: "-1px" }}>Kids Activity &amp; <span style={{ color: "#075fe4" }}>Tracing Book</span></h2>
-          <p style={{ color: "#52627a", fontSize: 16, lineHeight: 1.7, margin: "0 0 18px" }}>Fun printable learning for little learners — tracing, coloring, letters, numbers and shapes.</p>
-          <div style={{ display: "flex", gap: 10, flexWrap: "wrap", marginBottom: 22, color: "#29446b", fontSize: 14 }}><span>✏️ Tracing</span><span>•</span><span>🖍️ Coloring</span><span>•</span><span>🔢 Numbers</span></div>
-          <div style={{ display: "flex", alignItems: "center", gap: 16, flexWrap: "wrap" }}><strong style={{ fontSize: 32, color: "#0754bd" }}>$2.99</strong><a href="https://qsaim.gumroad.com/l/kids-activity-book" target="_blank" rel="noreferrer" style={{ ...buttonStyle, width: "auto", minWidth: 150 }}>Buy Now <ArrowRight size={18}/></a></div>
-          <a href="/products" style={{ display: "inline-flex", alignItems: "center", gap: 8, marginTop: 22, padding: "12px 18px", border: "1px solid #7aaeff", borderRadius: 14, color: "#0754bd", fontWeight: 800, textDecoration: "none", background: "#fff" }}>View All Products <ArrowRight size={17}/></a>
-        </div>
-        <div style={{ background: "rgba(255,255,255,.78)", border: "1px solid #d6e7ff", borderRadius: 24, padding: 14, boxShadow: "0 20px 48px rgba(12,55,115,.12)" }}>
-          <img src="/kids-book-cover.png" alt="Kids Activity and Tracing Book cover with worksheets" style={{ display: "block", width: "100%", maxHeight: 420, objectFit: "contain", borderRadius: 16 }} />
-        </div>
-      </div>
-    </section>
-  );
+function formatProductPrice(product) { const currency=product.currency||"USD"; const symbol=currency==="INR"?"₹":currency==="AED"?"AED ":"$"; return symbol+Number(product.price||0).toFixed(2); }
+function ProductsSection({products=[]}) {
+ const product=products.find(p=>p.status==="active"&&p.show_on_home);
+ if(!product)return null;
+ const btn={display:"inline-flex",alignItems:"center",gap:10,borderRadius:14,padding:"14px 18px",background:"linear-gradient(135deg,#075fe4,#0a3b91)",color:"#fff",fontWeight:800,textDecoration:"none"};
+ return <section id="products" style={{padding:"45px 20px",margin:"28px auto",background:"linear-gradient(135deg,#edf5ff,#fff 55%,#fff3e7)"}}><div style={{maxWidth:1080,margin:"auto",display:"grid",gridTemplateColumns:"repeat(auto-fit,minmax(min(100%,330px),1fr))",gap:28,alignItems:"center"}}><div><span>✦ FEATURED PRODUCT</span><h2 style={{fontSize:"clamp(30px,4vw,46px)",color:"#10213e"}}>{product.title}</h2><p style={{color:"#52627a",lineHeight:1.7}}>{product.description}</p><strong style={{fontSize:32,color:"#0754bd"}}>{formatProductPrice(product)}</strong> {product.gumroad_url&&<a href={product.gumroad_url} target="_blank" rel="noreferrer" style={btn}>Buy Now <ArrowRight size={18}/></a>}<p><a href="/products">View All Products →</a></p></div><div style={{background:"#fff",borderRadius:22,padding:14}}>{product.thumbnail_path?<img src={product.thumbnail_path} alt={product.title+" cover"} style={{width:"100%",maxHeight:420,objectFit:"contain"}}:<div>Product preview</div>}</div></div></section>;
 }
-
-function AllProductsPage({ onBack }) {
-  const products = [
-    { title: "Kids Activity & Tracing Book", description: "Printable early-learning practice with tracing, coloring, letters, numbers and shapes.", price: "$2.99", image: "/kids-book-cover.png", url: "https://qsaim.gumroad.com/l/kids-activity-book", label: "LATEST PRODUCT" },
-    { title: "AI Career System", description: "A practical guide to using AI for job search, resumes, LinkedIn, interviews and career growth.", price: "$5.00", image: "/ai-career-cover.png", url: EBOOK_URL, label: "DIGITAL GUIDE" }
-  ];
-  return (
-    <div className="public-site" style={{ minHeight: "70vh", background: "linear-gradient(145deg,#f2f7ff,#fff 65%,#fff7ed)", padding: "clamp(24px,5vw,60px) 20px" }}>
-      <div style={{ maxWidth: 1120, margin: "0 auto" }}>
-        <a href="/" onClick={onBack} style={{ color: "#0754bd", textDecoration: "none", fontWeight: 800 }}>← Back to Home</a>
-        <div style={{ margin: "28px 0", display: "flex", alignItems: "end", justifyContent: "space-between", gap: 20, flexWrap: "wrap" }}><div><span style={{ color: "#0754bd", background: "#dcecff", padding: "7px 12px", borderRadius: 999, fontSize: 12, fontWeight: 900 }}>SK DIGITAL SERVICE STORE</span><h1 style={{ color: "#10213e", fontSize: "clamp(34px,5vw,52px)", margin: "16px 0 8px" }}>All Products</h1><p style={{ color: "#52627a", margin: 0 }}>Explore our digital books and learning resources.</p></div><div style={{ color: "#52627a", fontSize: 14 }}>✦ Digital products · Simple one-time pricing</div></div>
-        <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit,minmax(min(100%,320px),1fr))", gap: 24 }}>
-          {products.map(product => <article key={product.title} style={{ background: "#fff", border: "1px solid #dce8f8", borderRadius: 22, padding: 20, boxShadow: "0 14px 36px rgba(12,55,115,.08)", display: "flex", flexDirection: "column" }}>
-            <div style={{ height: 280, borderRadius: 16, background: "#f3f8ff", display: "grid", placeItems: "center", overflow: "hidden", marginBottom: 18 }}><img src={product.image} alt={`${product.title} cover`} style={{ width: "100%", height: "100%", objectFit: "contain" }}/></div>
-            <span style={{ color: "#0754bd", fontSize: 11, fontWeight: 900, letterSpacing: 1 }}>{product.label}</span><h2 style={{ fontSize: 22, color: "#10213e", margin: "8px 0" }}>{product.title}</h2><p style={{ color: "#52627a", lineHeight: 1.65, flex: 1 }}>{product.description}</p>
-            <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", gap: 12, marginTop: 10 }}><strong style={{ fontSize: 28, color: "#0754bd" }}>{product.price}</strong><a href={product.url} target="_blank" rel="noreferrer" style={{ background: "linear-gradient(135deg,#075fe4,#0a3b91)", color: "white", borderRadius: 12, padding: "12px 18px", fontWeight: 800, textDecoration: "none", display: "inline-flex", alignItems: "center", gap: 8 }}>Buy Now <ArrowRight size={17}/></a></div>
-          </article>)}
-        </div>
-      </div>
-    </div>
-  );
+function AllProductsPage({onBack,products=[]}) {
+ const visible=products.filter(p=>p.status==="active"&&p.show_on_products!==false);
+ return <div className="public-site" style={{minHeight:"70vh",background:"linear-gradient(145deg,#f2f7ff,#fff 65%,#fff7ed)",padding:"clamp(24px,5vw,60px) 20px"}}><div style={{maxWidth:1120,margin:"auto"}}><a href="/" onClick={onBack}>← Back to Home</a><h1 style={{color:"#10213e",fontSize:48}}>All Products</h1><p>Explore our digital books and learning resources.</p><div style={{display:"grid",gridTemplateColumns:"repeat(auto-fit,minmax(min(100%,300px),1fr))",gap:24}}>{visible.map(p=><article key={p.id} style={{background:"#fff",border:"1px solid #dce8f8",borderRadius:20,padding:20,display:"flex",flexDirection:"column"}}><div style={{height:260,display:"grid",placeItems:"center",background:"#f3f8ff",borderRadius:14,overflow:"hidden"}}>{p.thumbnail_path?<img src={p.thumbnail_path} alt={p.title+" cover"} style={{width:"100%",height:"100%",objectFit:"contain"}}:<span>Product preview</span>}</div><h2>{p.title}</h2><p style={{flex:1}}>{p.description}</p><div style={{display:"flex",justifyContent:"space-between",alignItems:"center",gap:10}}><strong style={{fontSize:26,color:"#0754bd"}}>{formatProductPrice(p)}</strong>{p.gumroad_url&&<a href={p.gumroad_url} target="_blank" rel="noreferrer" style={{background:"#075fe4",color:"#fff",padding:"12px 16px",borderRadius:10,textDecoration:"none",fontWeight:800}}>Buy Now</a>}</div></article>)}</div>{visible.length===0&&<p>Products coming soon. Please check back later.</p>}</div></div>;
 }
 
 /* =========================================================
