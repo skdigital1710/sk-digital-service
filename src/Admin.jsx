@@ -2,7 +2,7 @@ import React, { useEffect, useMemo, useState } from "react";
 import "./Admin.css";
 import "./PublicSiteSettings.css";
 import {
-  BarChart3, Bell, CheckCircle2, Edit3, ExternalLink, Eye, FileText,
+  BarChart3, Bell, CheckCircle2, Edit3, ExternalLink, Eye, FileText, Package,
   FolderOpen, Image as ImageIcon, LayoutDashboard, Link as LinkIcon,
   LogOut, Menu, Moon, Plus, RefreshCw, Search, Settings, ShieldCheck,
   Star, Sun, Trash2, UploadCloud, X, Megaphone, Save, Clock3, Sparkles
@@ -96,12 +96,14 @@ function Admin() {
   const [forgotMode, setForgotMode] = useState(false), [resetMode, setResetMode] = useState(false);
   const [resetPassword, setResetPassword] = useState(""), [confirmResetPassword, setConfirmResetPassword] = useState("");
   const [recoveryLoading, setRecoveryLoading] = useState(false), [recoveryMessage, setRecoveryMessage] = useState("");
-  const [resources, setResources] = useState([]), [categories, setCategories] = useState(fallbackCategories), [promotions, setPromotions] = useState([]);
+  const [resources, setResources] = useState([]), [categories, setCategories] = useState(fallbackCategories), [promotions, setPromotions] = useState([]), [products, setProducts] = useState([]);
   const [settings, setSettings] = useState(null), [dataLoading, setDataLoading] = useState(false);
   const [activeSection, setActiveSection] = useState("dashboard"), [search, setSearch] = useState(""), [statusFilter, setStatusFilter] = useState("all");
   const [showSidebar, setShowSidebar] = useState(false), [darkMode, setDarkMode] = useState(localStorage.getItem("sk_admin_theme") === "dark");
   const [showResourceModal, setShowResourceModal] = useState(false), [editingResource, setEditingResource] = useState(null), [form, setForm] = useState(emptyForm);
   const [showPromotionModal, setShowPromotionModal] = useState(false), [editingPromotion, setEditingPromotion] = useState(null);
+  const [showProductModal, setShowProductModal] = useState(false), [editingProduct, setEditingProduct] = useState(null);
+  const [productForm, setProductForm] = useState({title:"",description:"",price:"",currency:"USD",thumbnailPath:"",gumroadUrl:"",status:"active",showOnHome:false,showOnProducts:true});
   const [promotion, setPromotion] = useState({title:"",subtitle:"",description:"",image:null,imageUrl:"",buttonText:"View Now",buttonUrl:"",placement:"sidebar",displayOrder:0,isActive:true,startAt:"",endAt:""});
   const [siteForm, setSiteForm] = useState(DEFAULT_SITE_SETTINGS), [jobBuilderText, setJobBuilderText] = useState("");
   const [saving, setSaving] = useState(false), [message, setMessage] = useState(""), [error, setError] = useState("");
@@ -119,15 +121,17 @@ function Admin() {
 
   async function loadAll(){
     setDataLoading(true); setError("");
-    const [r,c,p,s]=await Promise.all([
+    const [r,c,p,s,pr]=await Promise.all([
       supabase.from("resources").select("*").order("created_at",{ascending:false}),
       supabase.from("categories").select("*").eq("is_active",true).order("display_order",{ascending:true}),
       supabase.from("promotions").select("*").order("display_order",{ascending:true}).order("created_at",{ascending:false}),
       supabase.from("site_settings").select("*").eq("id",1).maybeSingle(),
+      supabase.from("products").select("*").order("title",{ascending:true}),
     ]);
     if(r.error)setError(r.error.message); else setResources(r.data||[]);
     if(!c.error && c.data?.length)setCategories(c.data);
     if(!p.error)setPromotions(p.data||[]); else setError(p.error.message);
+    if(!pr.error)setProducts(pr.data||[]); else setError(pr.error.message);
     if(!s.error){
       const nextSettings={...DEFAULT_SITE_SETTINGS,...(s.data||{})};
       setSettings(nextSettings);
@@ -195,6 +199,13 @@ function Admin() {
   async function savePromotion(e){e.preventDefault();setSaving(true);setError("");try{let imagePath=editingPromotion?.image_path||null;if(promotion.image){imagePath=await uploadFile(promotion.image,"promo")}const payload={title:promotion.title.trim(),subtitle:promotion.subtitle.trim(),description:promotion.description.trim(),image_path:imagePath,image_url:imagePath?publicImageUrl(imagePath):promotion.imageUrl.trim(),button_text:promotion.buttonText.trim()||"View Now",button_url:promotion.buttonUrl.trim(),placement:promotion.placement,display_order:Number(promotion.displayOrder)||0,is_active:promotion.isActive,start_at:promotion.startAt?new Date(promotion.startAt).toISOString():null,end_at:promotion.endAt?new Date(promotion.endAt).toISOString():null,updated_at:new Date().toISOString()};let q=editingPromotion?supabase.from("promotions").update(payload).eq("id",editingPromotion.id):supabase.from("promotions").insert(payload);const {error:e1}=await q;if(e1)throw e1;setMessage("Promotion saved");setShowPromotionModal(false);loadAll()}catch(err){setError(err.message)}finally{setSaving(false)}}
   async function deletePromotion(p){if(!confirm(`Delete “${p.title}”?`))return;if(p.image_path)await supabase.storage.from("resource-thumbnails").remove([p.image_path]);const {error:e}=await supabase.from("promotions").delete().eq("id",p.id);if(e)setError(e.message);else{setMessage("Promotion deleted");loadAll()}}
   async function togglePromotion(p){const {error:e}=await supabase.from("promotions").update({is_active:!p.is_active,updated_at:new Date().toISOString()}).eq("id",p.id);if(e)setError(e.message);else loadAll()}
+
+
+  function openAddProduct(){setEditingProduct(null);setProductForm({title:"",description:"",price:"",currency:"USD",thumbnailPath:"",gumroadUrl:"",status:"active",showOnHome:false,showOnProducts:true});setError("");setShowProductModal(true)}
+  function openEditProduct(p){setEditingProduct(p);setProductForm({title:p.title||"",description:p.description||"",price:p.price??"",currency:p.currency||"USD",thumbnailPath:p.thumbnail_path||"",gumroadUrl:p.gumroad_url||"",status:p.status||"active",showOnHome:!!p.show_on_home,showOnProducts:p.show_on_products!==false});setError("");setShowProductModal(true)}
+  async function saveProduct(e){e.preventDefault();setSaving(true);setError("");try{if(!productForm.title.trim())throw new Error("Product title required hai.");if(!productForm.gumroadUrl.trim())throw new Error("Gumroad Buy Now URL required hai.");if(!/^https?:\/\//i.test(productForm.gumroadUrl.trim()))throw new Error("Valid Gumroad URL enter karein.");const payload={title:productForm.title.trim(),description:productForm.description.trim(),price:Number(productForm.price)||0,currency:productForm.currency,thumbnail_path:productForm.thumbnailPath.trim()||null,gumroad_url:productForm.gumroadUrl.trim(),status:productForm.status,show_on_home:productForm.showOnHome,show_on_products:productForm.showOnProducts};const q=editingProduct?supabase.from("products").update(payload).eq("id",editingProduct.id):supabase.from("products").insert(payload);const {error:e1}=await q;if(e1)throw e1;setMessage(editingProduct?"Product updated successfully.":"Product added successfully.");setShowProductModal(false);await loadAll()}catch(err){setError(err.message||"Product save failed.")}finally{setSaving(false)}}
+  async function deleteProduct(p){if(!window.confirm("Delete "+(p.title||"this product")+"? This cannot be undone."))return;const {error:e}=await supabase.from("products").delete().eq("id",p.id);if(e)setError(e.message);else{setMessage("Product deleted");loadAll()}}
+  async function toggleProductStatus(p){const {error:e}=await supabase.from("products").update({status:p.status==="active"?"inactive":"active"}).eq("id",p.id);if(e)setError(e.message);else{setMessage("Product status updated");loadAll()}}
 
   async function saveSettings(e){e.preventDefault();setSaving(true);setError("");try{const {error:e1}=await supabase.from("site_settings").update({...siteForm,updated_at:new Date().toISOString()}).eq("id",1);if(e1)throw e1;setMessage("Public site settings saved");loadAll()}catch(err){setError(err.message)}finally{setSaving(false)}}
 
