@@ -352,11 +352,11 @@ function ProductsSection({products=[]}) {
  const product=products.find(p=>p.status==="active"&&p.show_on_home);
  if(!product)return null;
  const btn={display:"inline-flex",alignItems:"center",gap:10,borderRadius:14,padding:"14px 18px",background:"linear-gradient(135deg,#075fe4,#0a3b91)",color:"#fff",fontWeight:800,textDecoration:"none"};
- return <section id="products" style={{padding:"45px 20px",margin:"28px auto",background:"linear-gradient(135deg,#edf5ff,#fff 55%,#fff3e7)"}}><div style={{maxWidth:1080,margin:"auto",display:"grid",gridTemplateColumns:"repeat(auto-fit,minmax(min(100%,330px),1fr))",gap:28,alignItems:"center"}}><div><span>✦ FEATURED PRODUCT</span><h2 style={{fontSize:"clamp(30px,4vw,46px)",color:"#10213e"}}>{product.title}</h2><p style={{color:"#52627a",lineHeight:1.7}}>{product.description}</p><strong style={{fontSize:32,color:"#0754bd"}}>{formatProductPrice(product)}</strong> {product.gumroad_url&&<a href={product.gumroad_url} target="_blank" rel="noreferrer" style={btn}>Buy Now <ArrowRight size={18}/></a>}<p><a href="/products">View All Products →</a></p></div><div style={{background:"#fff",borderRadius:22,padding:14}}>{product.thumbnail_path?<img src={product.thumbnail_path} alt={product.title+" cover"} style={{width:"100%",maxHeight:420,objectFit:"contain"}}:<div>Product preview</div>}</div></div></section>;
+ return <section id="products" style={{padding:"45px 20px",margin:"28px auto",background:"linear-gradient(135deg,#edf5ff,#fff 55%,#fff3e7)"}}><div style={{maxWidth:1080,margin:"auto",display:"grid",gridTemplateColumns:"repeat(auto-fit,minmax(min(100%,330px),1fr))",gap:28,alignItems:"center"}}><div><span>✦ FEATURED PRODUCT</span><h2 style={{fontSize:"clamp(30px,4vw,46px)",color:"#10213e"}}>{product.title}</h2><p style={{color:"#52627a",lineHeight:1.7}}>{product.description}</p><strong style={{fontSize:32,color:"#0754bd"}}>{formatProductPrice(product)}</strong> {product.gumroad_url&&<a href={product.gumroad_url} target="_blank" rel="noreferrer" style={btn}>Buy Now <ArrowRight size={18}/></a>}<p><a href="/products">View All Products →</a></p></div><div style={{background:"#fff",borderRadius:22,padding:14}}>{product.thumbnail_path?<img src={product.thumbnail_path} alt={product.title+" cover"} style={{width:"100%",maxHeight:420,objectFit:"contain"}}/>:<div>Product preview</div>}</div></div></section>;
 }
 function AllProductsPage({onBack,products=[]}) {
  const visible=products.filter(p=>p.status==="active"&&p.show_on_products!==false);
- return <div className="public-site" style={{minHeight:"70vh",background:"linear-gradient(145deg,#f2f7ff,#fff 65%,#fff7ed)",padding:"clamp(24px,5vw,60px) 20px"}}><div style={{maxWidth:1120,margin:"auto"}}><a href="/" onClick={onBack}>← Back to Home</a><h1 style={{color:"#10213e",fontSize:48}}>All Products</h1><p>Explore our digital books and learning resources.</p><div style={{display:"grid",gridTemplateColumns:"repeat(auto-fit,minmax(min(100%,300px),1fr))",gap:24}}>{visible.map(p=><article key={p.id} style={{background:"#fff",border:"1px solid #dce8f8",borderRadius:20,padding:20,display:"flex",flexDirection:"column"}}><div style={{height:260,display:"grid",placeItems:"center",background:"#f3f8ff",borderRadius:14,overflow:"hidden"}}>{p.thumbnail_path?<img src={p.thumbnail_path} alt={p.title+" cover"} style={{width:"100%",height:"100%",objectFit:"contain"}}:<span>Product preview</span>}</div><h2>{p.title}</h2><p style={{flex:1}}>{p.description}</p><div style={{display:"flex",justifyContent:"space-between",alignItems:"center",gap:10}}><strong style={{fontSize:26,color:"#0754bd"}}>{formatProductPrice(p)}</strong>{p.gumroad_url&&<a href={p.gumroad_url} target="_blank" rel="noreferrer" style={{background:"#075fe4",color:"#fff",padding:"12px 16px",borderRadius:10,textDecoration:"none",fontWeight:800}}>Buy Now</a>}</div></article>)}</div>{visible.length===0&&<p>Products coming soon. Please check back later.</p>}</div></div>;
+ return <div className="public-site" style={{minHeight:"70vh",background:"linear-gradient(145deg,#f2f7ff,#fff 65%,#fff7ed)",padding:"clamp(24px,5vw,60px) 20px"}}><div style={{maxWidth:1120,margin:"auto"}}><a href="/" onClick={onBack}>← Back to Home</a><h1 style={{color:"#10213e",fontSize:48}}>All Products</h1><p>Explore our digital books and learning resources.</p><div style={{display:"grid",gridTemplateColumns:"repeat(auto-fit,minmax(min(100%,300px),1fr))",gap:24}}>{visible.map(p=><article key={p.id} style={{background:"#fff",border:"1px solid #dce8f8",borderRadius:20,padding:20,display:"flex",flexDirection:"column"}}><div style={{height:260,display:"grid",placeItems:"center",background:"#f3f8ff",borderRadius:14,overflow:"hidden"}}>{p.thumbnail_path?<img src={p.thumbnail_path} alt={p.title+" cover"} style={{width:"100%",height:"100%",objectFit:"contain"}}/>:<span>Product preview</span>}</div><h2>{p.title}</h2><p style={{flex:1}}>{p.description}</p><div style={{display:"flex",justifyContent:"space-between",alignItems:"center",gap:10}}><strong style={{fontSize:26,color:"#0754bd"}}>{formatProductPrice(p)}</strong>{p.gumroad_url&&<a href={p.gumroad_url} target="_blank" rel="noreferrer" style={{background:"#075fe4",color:"#fff",padding:"12px 16px",borderRadius:10,textDecoration:"none",fontWeight:800}}>Buy Now</a>}</div></article>)}</div>{visible.length===0&&<p>Products coming soon. Please check back later.</p>}</div></div>;
 }
 
 /* =========================================================
@@ -1459,6 +1459,8 @@ export default function App() {
   const [promotions, setPromotions] =
     useState([]);
 
+  const [products, setProducts] = useState([]);
+
   const [settings, setSettings] =
     useState(null);
 
@@ -1521,7 +1523,8 @@ export default function App() {
         rr,
         cc,
         pp,
-        ss
+        ss,
+        pr
       ] = await Promise.all([
 
         supabase
@@ -1563,7 +1566,9 @@ export default function App() {
           .from("site_settings")
           .select("*")
           .eq("id", 1)
-          .maybeSingle()
+          .maybeSingle(),
+
+        supabase.from("products").select("*").eq("status", "active").order("title", { ascending: true })
 
       ]);
 
@@ -1582,6 +1587,8 @@ export default function App() {
       if (!ss.error) {
         setSettings(ss.data);
       }
+
+      if (!pr.error) setProducts(pr.data || []);
 
       setLoading(false);
 
@@ -1758,7 +1765,7 @@ export default function App() {
   }
 
   if (route === "/products") {
-    return <AllProductsPage onBack={(event) => { if (event && event.preventDefault) event.preventDefault(); history.pushState({}, "", "/"); setRoute("/"); window.scrollTo(0, 0); }} />;
+    return <AllProductsPage products={products} onBack={(event) => { if (event && event.preventDefault) event.preventDefault(); history.pushState({}, "", "/"); setRoute("/"); window.scrollTo(0, 0); }} />;
   }
 
   /* =======================================================
@@ -2029,7 +2036,7 @@ export default function App() {
               FEATURED PRODUCTS
           ================================================= */}
 
-          <ProductsSection />
+          <ProductsSection products={products} />
 
           {/* =================================================
               JOB CATEGORIES
