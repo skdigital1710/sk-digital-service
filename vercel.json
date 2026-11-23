@@ -2,6 +2,8 @@
   "rewrites": [
     { "source": "/admin", "destination": "/" },
     { "source": "/admin/", "destination": "/" },
+    { "source": "/products", "destination": "/" },
+    { "source": "/products/", "destination": "/" },
     { "source": "/resource/(.*)", "destination": "/" }
   ]
 }
