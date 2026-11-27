@@ -1034,9 +1034,9 @@ body { font-size:15px; }
 .hero-copy p{font-size:14px !important;line-height:1.55 !important}
 .hero-illustration{height:165px !important}
 .hero-section{background:linear-gradient(115deg,#073f93 0%,#0869d4 58%,#0b8ce9 100%) !important}
-.content-layout{grid-template-columns:minmax(0,1fr) !important;gap:14px !important}
+.content-layout{grid-template-columns:minmax(0,1fr) 300px !important;gap:16px !important}
 .jobs-panel{width:100%}
-.side-panel{display:grid !important;grid-template-columns:repeat(2,minmax(0,1fr));align-items:start}
+.side-panel{display:flex !important;flex-direction:column !important;align-items:stretch;min-width:0}
 .category-row{display:flex !important;flex-wrap:wrap;gap:10px !important;margin:14px auto 16px !important}
 .category-row button{min-height:64px !important;min-width:108px;padding:10px 14px !important;display:flex;align-items:center;gap:9px}
 .category-row button span{width:36px !important;height:36px !important}
@@ -1181,3 +1181,15 @@ body { font-size:15px; }
  .sidebar-ad-ticker-item .promotion-card>img{min-height:115px;max-height:145px}
 }
 @media(prefers-reduced-motion:reduce){.sidebar-ad-ticker-track{animation:none !important}}
+
+
+/* Final responsive rules: keep the ad rail beside jobs on desktop and stack it below on small screens */
+@media(max-width:800px){
+ .content-layout{grid-template-columns:minmax(0,1fr) !important;gap:14px !important}
+ .side-panel{display:flex !important;flex-direction:column !important;width:100%}
+ .sidebar-ad-ticker-window{height:320px}
+}
+@media(min-width:801px){
+ .content-layout{grid-template-columns:minmax(0,1fr) 300px !important}
+ .side-panel{display:flex !important;flex-direction:column !important}
+}
