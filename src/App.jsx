@@ -1747,7 +1747,7 @@ export default function App() {
     (!p.start_at || new Date(p.start_at).getTime() <= now) &&
     (!p.end_at || new Date(p.end_at).getTime() >= now)
   );
-  const topPromos = scheduledPromotions.filter(p => p.placement === "top");
+  const topPromos = scheduledPromotions.filter(p => p.placement === "top" || p.placement === "latest_jobs");
   const sidePromos = scheduledPromotions.filter(p => p.placement === "sidebar");
   const bottomPromos = scheduledPromotions.filter(p => p.placement === "bottom");
   const popupPromo = scheduledPromotions.find(p => p.placement === "popup");
