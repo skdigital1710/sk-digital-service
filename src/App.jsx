@@ -1870,13 +1870,13 @@ export default function App() {
 
                 <h1>
                   {settings?.hero_title ||
-                    "Your Dream Job"}
+                    "Your Career. Your Growth."}
 
                   <br />
 
                   <mark>
                     {settings?.hero_highlight ||
-                      "Is Just a Click Away"}
+                      "One Trusted Platform."}
                   </mark>
                 </h1>
 
