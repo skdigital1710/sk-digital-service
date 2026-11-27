@@ -348,39 +348,56 @@ function Promotion({ p, compact = false }) {
   );
 }
 
+function PopupPromotion({p}) {
+ const [visible,setVisible]=useState(false);
+ useEffect(()=>{
+   if(!p?.id)return;
+   const key="sk_ad_popup_"+p.id;
+   try {
+     const last=Number(localStorage.getItem(key)||0);
+     if(Date.now()-last>=24*60*60*1000) setVisible(true);
+   } catch { setVisible(true); }
+ },[p?.id]);
+ if(!visible||!p)return null;
+ const close=()=>{
+   try{localStorage.setItem("sk_ad_popup_"+p.id,String(Date.now()))}catch{}
+   setVisible(false);
+ };
+ const href=safeUrl(p.button_url);
+ return <div className="sk-ad-popup-backdrop" role="dialog" aria-modal="true" aria-label={p.title||"Sponsored advertisement"} onClick={close}>
+   <div className="sk-ad-popup" onClick={e=>e.stopPropagation()}>
+     <button className="sk-ad-popup-close" onClick={close} aria-label="Close advertisement">×</button>
+     {p.image_url&&<img src={p.image_url} alt={p.title||"Sponsored promotion"}/>}
+     <div className="sk-ad-popup-copy"><span>SPONSORED</span><h2>{p.title}</h2>{p.description&&<p>{p.description}</p>}{href&&<a href={href} target="_blank" rel="noopener noreferrer" onClick={close}>{p.button_text||"Know More"} <ArrowRight size={16}/></a>}</div>
+   </div>
+ </div>;
+}
+
 /* =========================================================
    FEATURED PRODUCTS
    ========================================================= */
 
 function formatProductPrice(product) { const currency=product.currency||"USD"; const symbol=currency==="INR"?"₹":currency==="AED"?"AED ":"$"; return symbol+Number(product.price||0).toFixed(2); }
 function ProductsSection({products=[]}) {
- const visible=products.filter(p=>p.status==="active"&&p.show_on_home!==false);
- if(!visible.length)return null;
- return <section id="products" className="products-showcase">
+ const product=products.find(p=>p.status==="active"&&p.show_on_home!==false);
+ if(!product)return null;
+ return <section id="products" className="products-showcase products-featured-only">
    <div className="products-showcase-inner">
-     <div className="products-heading">
-       <span className="products-kicker"><Sparkles size={15}/> SK DIGITAL STORE</span>
-       <h2>Explore Digital Products</h2>
-       <p>Learning resources and useful digital downloads — all in one place.</p>
+     <div className="products-featured-heading">
+       <div><span className="products-kicker"><Sparkles size={15}/> SK DIGITAL STORE</span><h2>Digital Products</h2></div>
+       <b>Learn • Grow • Explore</b>
      </div>
-     <div className="products-grid">
-       {visible.map((product,index)=><article className="store-product-card" key={product.id}>
-         <div className="store-product-art">
-           {product.thumbnail_path?<img src={product.thumbnail_path} alt={product.title+" cover"} loading="lazy"/>:<div className="store-product-placeholder"><WalletCards size={42}/><span>SK DIGITAL PRODUCT</span></div>}
-           {index===0&&<span className="store-product-ribbon">POPULAR</span>}
-         </div>
-         <div className="store-product-copy">
-           <span className="store-product-label">DIGITAL DOWNLOAD</span>
-           <h3>{product.title}</h3>
-           <p>{product.description||"Instant access to a useful digital resource."}</p>
-           <div className="store-product-buy">
-             <strong>{formatProductPrice(product)}</strong>
-             {safeUrl(product.gumroad_url)&&<a href={safeUrl(product.gumroad_url)} target="_blank" rel="noopener noreferrer">Buy Now <ArrowRight size={16}/></a>}
-           </div>
-         </div>
-       </article>)}
-     </div>
-     <a className="products-view-all" href="/products">Explore All Products <ArrowRight size={17}/></a>
+     <article className="store-product-card featured-product-card">
+       <div className="store-product-art">
+         {product.thumbnail_path?<img src={product.thumbnail_path} alt={product.title+" cover"} loading="lazy"/>:<div className="store-product-placeholder"><WalletCards size={42}/><span>SK DIGITAL PRODUCT</span></div>}
+       </div>
+       <div className="store-product-copy">
+         <span className="store-product-label">FEATURED DIGITAL PRODUCT</span>
+         <h3>{product.title}</h3>
+         <p>{product.description||"Instant access to a useful digital resource."}</p>
+         <div className="store-product-buy"><strong>{formatProductPrice(product)}</strong><a className="explore-products-cta" href="/products">Explore Products <ArrowRight size={16}/></a></div>
+       </div>
+     </article>
    </div>
  </section>;
 }
@@ -1725,23 +1742,15 @@ export default function App() {
     ) ||
     YT_FALLBACK;
 
-  const topPromos =
-    promotions.filter(
-      p =>
-        p.placement === "top"
-    );
-
-  const sidePromos =
-    promotions.filter(
-      p =>
-        p.placement === "sidebar"
-    );
-
-  const bottomPromos =
-    promotions.filter(
-      p =>
-        p.placement === "bottom"
-    );
+  const now = Date.now();
+  const scheduledPromotions = promotions.filter(p =>
+    (!p.start_at || new Date(p.start_at).getTime() <= now) &&
+    (!p.end_at || new Date(p.end_at).getTime() >= now)
+  );
+  const topPromos = scheduledPromotions.filter(p => p.placement === "top");
+  const sidePromos = scheduledPromotions.filter(p => p.placement === "sidebar");
+  const bottomPromos = scheduledPromotions.filter(p => p.placement === "bottom");
+  const popupPromo = scheduledPromotions.find(p => p.placement === "popup");
 
   const openJob = r => {
 
@@ -1838,6 +1847,7 @@ export default function App() {
             )
           }
         />
+        <PopupPromotion p={popupPromo}/>
 
         <main>
 
@@ -2054,31 +2064,6 @@ export default function App() {
             </div>
 
           </section>
-
-          {/* =================================================
-              TOP PROMOTIONS
-          ================================================= */}
-
-          {topPromos.length > 0 && (
-            <section className="shell promo-row">
-
-              {topPromos.map(
-                p => (
-                  <Promotion
-                    p={p}
-                    key={p.id}
-                  />
-                )
-              )}
-
-            </section>
-          )}
-
-          {/* =================================================
-              FEATURED PRODUCTS
-          ================================================= */}
-
-          <ProductsSection products={products} />
 
           {/* =================================================
               JOB CATEGORIES
@@ -2361,6 +2346,33 @@ export default function App() {
             </aside>
 
           </section>
+
+
+
+          {/* =================================================
+              TOP PROMOTIONS
+          ================================================= */}
+
+          {topPromos.length > 0 && (
+            <section className="shell promo-row">
+
+              {topPromos.map(
+                p => (
+                  <Promotion
+                    p={p}
+                    key={p.id}
+                  />
+                )
+              )}
+
+            </section>
+          )}
+
+          {/* =================================================
+              FEATURED PRODUCTS
+          ================================================= */}
+
+          <ProductsSection products={products} />
 
           {/* =================================================
               WHY SK DIGITAL SERVICE
