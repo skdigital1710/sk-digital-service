@@ -1026,7 +1026,7 @@ body { font-size:15px; }
    ========================================================= */
 .hero-grid{
   min-height:190px !important;
-  grid-template-columns:minmax(0,1.15fr) minmax(210px,.8fr) !important;
+  grid-template-columns:minmax(0,1.05fr) minmax(180px,.72fr) minmax(280px,.95fr) !important;
   gap:22px !important;
   padding:20px 0 !important;
 }
@@ -1078,7 +1078,7 @@ body { font-size:15px; }
 .sk-ad-popup-copy a{display:inline-flex;align-items:center;gap:8px;margin-top:10px;padding:12px 20px;border-radius:999px;background:#075fe4;color:#fff;font-weight:800;text-decoration:none}
 @keyframes skAdPop{from{opacity:0;transform:translateY(12px) scale(.97)}to{opacity:1;transform:none}}
 @media(max-width:800px){
- .hero-grid{min-height:160px !important;grid-template-columns:1fr minmax(130px,.55fr) !important;padding:16px 0 !important}
+ .hero-grid{min-height:160px !important;grid-template-columns:minmax(0,1fr) minmax(260px,.85fr) !important;padding:16px 0 !important}
  .hero-copy h1{font-size:clamp(24px,5vw,32px) !important}
  .hero-copy p{font-size:11px !important}
  .hero-illustration{height:130px !important}
