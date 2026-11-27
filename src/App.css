@@ -910,3 +910,112 @@ img{max-width:100%;display:block}
   border-color:rgba(100,160,220,.22);
   box-shadow:0 22px 55px rgba(0,0,0,.28);
 }
+
+
+/* =========================================================
+   SK DIGITAL SERVICE — RESPONSIVE 3D UI UPGRADE
+   Additive overrides: preserves existing sections and routes.
+   ========================================================= */
+html { font-size:16px; }
+body { font-size:15px; }
+.public-site { width:100%; min-height:100vh; }
+.public-site .shell { width:min(100% - 48px, 1380px); }
+.site-header { min-height:82px; height:auto; }
+.header-inner { min-height:82px; }
+.brand { min-width:245px; gap:13px; }
+.brand .sk-logo { width:76px; height:76px; object-fit:contain; }
+.brand>span { font-size:16px; line-height:1.25; font-weight:900; }
+.brand small { font-size:11px; }
+.nav a { font-size:13px; padding:12px 10px; }
+.head-search { width:clamp(190px,20vw,300px); height:42px; }
+.head-search input { font-size:13px; }
+.header-tools { gap:10px; }
+.hero-copy h1 { font-size:clamp(38px,4.3vw,62px); line-height:1.08; }
+.hero-copy p { font-size:16px; line-height:1.7; }
+.hero-badge,.trust-row span { font-size:12px; }
+.category-row { display:grid; grid-template-columns:repeat(auto-fit,minmax(105px,1fr)); gap:12px; margin-top:26px; margin-bottom:26px; }
+.category-row button { min-height:108px; padding:14px 8px; border-radius:18px; background:linear-gradient(145deg,#fff,#f1f6ff); border:1px solid #dce8f7; box-shadow:0 9px 22px rgba(20,65,120,.08),inset 0 1px #fff; transition:transform .2s,box-shadow .2s; }
+.category-row button:hover { transform:translateY(-4px); box-shadow:0 16px 30px rgba(20,65,120,.14); }
+.category-row button span { width:48px; height:48px; border-radius:15px; display:grid; place-items:center; }
+.category-row button b { font-size:12px; margin-top:8px; }
+.panel-heading h2 { font-size:25px; }
+.panel-heading p { font-size:13px; }
+.panel-heading span { font-size:11px; }
+.panel-heading button,.view-all-btn { font-size:13px; }
+.job-list-card { padding:19px; gap:18px; border-radius:18px; box-shadow:0 7px 20px rgba(15,55,100,.055); }
+.job-title-row h3 { font-size:17px; line-height:1.4; }
+.job-title-row>span { font-size:11px; }
+.job-meta { font-size:12px; line-height:1.6; }
+.job-card-action { min-width:145px; }
+.days-pill,.apply-mini { font-size:11px; }
+.empty-state { font-size:14px; padding:28px; }
+.countdown-card { padding:24px; border-radius:22px; }
+.countdown-card h3 { font-size:22px; }
+.countdown-card p { font-size:13px; }
+.quick-links h3,.follow-card h3 { font-size:16px; }
+.quick-links a,.follow-card p { font-size:13px; }
+.site-footer { font-size:13px; }
+.site-footer p,.site-footer a,.site-footer span { font-size:13px; }
+.sk-logo { max-width:100%; }
+.products-showcase { width:min(100% - 48px,1380px); margin:32px auto; padding:clamp(24px,4vw,52px); border:1px solid rgba(126,166,215,.35); border-radius:28px; background:radial-gradient(circle at 5% 5%,rgba(60,145,255,.15),transparent 30%),radial-gradient(circle at 95% 90%,rgba(255,153,49,.12),transparent 28%),linear-gradient(145deg,#f6faff,#fff 55%,#fff8f0); box-shadow:0 22px 55px rgba(19,68,128,.12),inset 0 1px #fff; }
+.products-showcase-inner,.all-products-inner { max-width:1280px; margin:auto; }
+.products-heading,.all-products-heading { text-align:center; margin:0 auto 28px; }
+.products-kicker,.all-products-heading>span { display:inline-flex; align-items:center; gap:7px; color:#075ac7; font-weight:900; font-size:12px; letter-spacing:1.4px; }
+.products-heading h2,.all-products-heading h1 { margin:12px 0 8px; color:#102b50; font-size:clamp(28px,3.5vw,42px); line-height:1.12; }
+.products-heading p,.all-products-heading p { color:#61758e; font-size:15px; }
+.products-grid { display:grid; grid-template-columns:repeat(auto-fit,minmax(min(100%,260px),1fr)); gap:22px; }
+.store-product-card { min-width:0; overflow:hidden; display:flex; flex-direction:column; border:1px solid #dce8f7; border-radius:22px; background:linear-gradient(160deg,#fff,#f8fbff); box-shadow:0 12px 28px rgba(15,58,112,.09),inset 0 1px #fff; transition:transform .25s,box-shadow .25s; }
+.store-product-card:hover { transform:translateY(-7px); box-shadow:0 22px 42px rgba(15,58,112,.16); }
+.store-product-art { height:235px; position:relative; display:grid; place-items:center; overflow:hidden; padding:16px; background:radial-gradient(circle at 50% 40%,#fff 0%,#eaf3ff 72%,#e4efff 100%); }
+.store-product-art img { width:100%; height:100%; object-fit:contain; filter:drop-shadow(0 13px 15px rgba(16,55,100,.18)); transition:transform .3s; }
+.store-product-card:hover .store-product-art img { transform:scale(1.045) rotate(-1deg); }
+.store-product-ribbon { position:absolute; top:14px; left:14px; padding:6px 10px; border-radius:999px; color:#fff; background:linear-gradient(120deg,#ff8a00,#f04c35); font-size:10px; font-weight:900; letter-spacing:.7px; }
+.store-product-placeholder { display:grid; gap:10px; place-items:center; color:#3472b8; font-weight:900; font-size:11px; }
+.store-product-copy { flex:1; display:flex; flex-direction:column; padding:20px; }
+.store-product-label { color:#0c69cb; font-size:10px; font-weight:900; letter-spacing:1px; }
+.store-product-copy h3 { margin:9px 0; color:#142d4e; font-size:19px; line-height:1.3; }
+.store-product-copy p { flex:1; color:#60738b; font-size:13px; line-height:1.65; }
+.store-product-buy { display:flex; align-items:center; justify-content:space-between; gap:12px; margin-top:15px; }
+.store-product-buy strong { color:#0754bd; font-size:23px; }
+.store-product-buy a { display:inline-flex; align-items:center; gap:8px; padding:11px 15px; border-radius:12px; color:#fff; background:linear-gradient(135deg,#0875ef,#073e91); box-shadow:0 8px 18px rgba(7,85,180,.22); font-size:12px; font-weight:900; }
+.products-view-all { display:flex; width:max-content; align-items:center; justify-content:center; gap:10px; margin:28px auto 0; padding:14px 20px; border-radius:14px; color:#fff; background:linear-gradient(135deg,#ff922e,#ef5a24); box-shadow:0 10px 22px rgba(239,90,36,.2); font-size:13px; font-weight:900; }
+.all-products-page { min-height:100vh; padding:clamp(24px,5vw,64px) 24px; background:radial-gradient(circle at 10% 5%,rgba(40,130,255,.13),transparent 28%),linear-gradient(145deg,#f1f7ff,#fff 65%,#fff6e9); }
+.products-back-link { display:inline-block; margin-bottom:28px; color:#075ac7; font-weight:800; font-size:14px; }
+.products-empty { text-align:center; padding:40px; color:#60738b; }
+[data-theme="dark"] .products-showcase,[data-theme="dark"] .store-product-card { background:linear-gradient(145deg,#10263e,#0b1c30); border-color:#294662; }
+[data-theme="dark"] .products-heading h2,[data-theme="dark"] .store-product-copy h3 { color:#eaf4ff; }
+[data-theme="dark"] .products-heading p,[data-theme="dark"] .store-product-copy p { color:#a8bfd7; }
+[data-theme="dark"] .store-product-art { background:linear-gradient(145deg,#183653,#10263e); }
+@media(max-width:1050px) {
+ .public-site .shell { width:min(100% - 32px,1380px); }
+ .brand { min-width:190px; }
+ .brand .sk-logo { width:64px; height:64px; }
+ .nav a { font-size:11px; padding:9px 6px; }
+ .header-inner { flex-wrap:wrap; }
+}
+@media(max-width:800px) {
+ .site-header,.header-inner { min-height:66px; height:auto; }
+ .brand .sk-logo { width:52px; height:52px; }
+ .brand { gap:8px; }
+ .brand>span { font-size:13px; }
+ .head-search { width:min(38vw,220px); }
+ .category-row { grid-template-columns:repeat(3,minmax(0,1fr)); }
+ .products-showcase { width:calc(100% - 24px); padding:24px 16px; border-radius:20px; }
+ .store-product-art { height:210px; }
+}
+@media(max-width:520px) {
+ .public-site .shell { width:calc(100% - 20px); }
+ .brand .sk-logo { width:46px; height:46px; }
+ .brand>span { font-size:11px; }
+ .head-search { width:112px; height:34px; }
+ .head-search input { font-size:10px; }
+ .category-row { grid-template-columns:repeat(3,minmax(0,1fr)); gap:7px; }
+ .category-row button { min-height:92px; }
+ .category-row button b { font-size:10px; }
+ .job-list-card { padding:12px; }
+ .job-title-row h3 { font-size:14px; }
+ .job-meta { font-size:10px; }
+ .products-grid { grid-template-columns:1fr; }
+ .store-product-art { height:230px; }
+ .all-products-page { padding:24px 12px; }
+}

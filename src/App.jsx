@@ -31,6 +31,9 @@ const JOB_CATS = [
   ["Defence", "defence", ShieldCheck, "#e5384a"],
   ["Police", "police", Star, "#1c4fa8"],
   ["Teaching", "teaching", GraduationCap, "#0b8a57"],
+  ["10th Pass", "10th", GraduationCap, "#0b8a57"],
+  ["12th Pass", "12th", GraduationCap, "#0b63d6"],
+  ["Graduation", "graduation", GraduationCap, "#7c3aed"],
   ["Other", "other", Grid3x3, "#5b6b82"]
 ];
 
@@ -108,11 +111,13 @@ function deadline(v) {
 }
 
 function jobCat(r) {
-  const s = String(
-    r?.job_category ||
-    r?.category ||
-    "other"
-  ).toLowerCase();
+  const s = [
+    r?.job_category,
+    r?.category,
+    r?.qualification,
+    r?.eligibility,
+    r?.title
+  ].filter(Boolean).join(" ").toLowerCase();
 
   for (const [name, slug] of JOB_CATS) {
     if (
@@ -349,14 +354,47 @@ function Promotion({ p, compact = false }) {
 
 function formatProductPrice(product) { const currency=product.currency||"USD"; const symbol=currency==="INR"?"₹":currency==="AED"?"AED ":"$"; return symbol+Number(product.price||0).toFixed(2); }
 function ProductsSection({products=[]}) {
- const product=products.find(p=>p.status==="active"&&p.show_on_home);
- if(!product)return null;
- const btn={display:"inline-flex",alignItems:"center",gap:10,borderRadius:14,padding:"14px 18px",background:"linear-gradient(135deg,#075fe4,#0a3b91)",color:"#fff",fontWeight:800,textDecoration:"none"};
- return <section id="products" style={{padding:"45px 20px",margin:"28px auto",background:"linear-gradient(135deg,#edf5ff,#fff 55%,#fff3e7)"}}><div style={{maxWidth:1080,margin:"auto",display:"grid",gridTemplateColumns:"repeat(auto-fit,minmax(min(100%,330px),1fr))",gap:28,alignItems:"center"}}><div><span>✦ FEATURED PRODUCT</span><h2 style={{fontSize:"clamp(30px,4vw,46px)",color:"#10213e"}}>{product.title}</h2><p style={{color:"#52627a",lineHeight:1.7}}>{product.description}</p><strong style={{fontSize:32,color:"#0754bd"}}>{formatProductPrice(product)}</strong> {product.gumroad_url&&<a href={product.gumroad_url} target="_blank" rel="noreferrer" style={btn}>Buy Now <ArrowRight size={18}/></a>}<p><a href="/products">View All Products →</a></p></div><div style={{background:"#fff",borderRadius:22,padding:14}}>{product.thumbnail_path?<img src={product.thumbnail_path} alt={product.title+" cover"} style={{width:"100%",maxHeight:420,objectFit:"contain"}}/>:<div>Product preview</div>}</div></div></section>;
+ const visible=products.filter(p=>p.status==="active"&&p.show_on_home!==false);
+ if(!visible.length)return null;
+ return <section id="products" className="products-showcase">
+   <div className="products-showcase-inner">
+     <div className="products-heading">
+       <span className="products-kicker"><Sparkles size={15}/> SK DIGITAL STORE</span>
+       <h2>Explore Digital Products</h2>
+       <p>Learning resources and useful digital downloads — all in one place.</p>
+     </div>
+     <div className="products-grid">
+       {visible.map((product,index)=><article className="store-product-card" key={product.id}>
+         <div className="store-product-art">
+           {product.thumbnail_path?<img src={product.thumbnail_path} alt={product.title+" cover"} loading="lazy"/>:<div className="store-product-placeholder"><WalletCards size={42}/><span>SK DIGITAL PRODUCT</span></div>}
+           {index===0&&<span className="store-product-ribbon">POPULAR</span>}
+         </div>
+         <div className="store-product-copy">
+           <span className="store-product-label">DIGITAL DOWNLOAD</span>
+           <h3>{product.title}</h3>
+           <p>{product.description||"Instant access to a useful digital resource."}</p>
+           <div className="store-product-buy">
+             <strong>{formatProductPrice(product)}</strong>
+             {safeUrl(product.gumroad_url)&&<a href={safeUrl(product.gumroad_url)} target="_blank" rel="noopener noreferrer">Buy Now <ArrowRight size={16}/></a>}
+           </div>
+         </div>
+       </article>)}
+     </div>
+     <a className="products-view-all" href="/products">Explore All Products <ArrowRight size={17}/></a>
+   </div>
+ </section>;
 }
 function AllProductsPage({onBack,products=[]}) {
  const visible=products.filter(p=>p.status==="active"&&p.show_on_products!==false);
- return <div className="public-site" style={{minHeight:"70vh",background:"linear-gradient(145deg,#f2f7ff,#fff 65%,#fff7ed)",padding:"clamp(24px,5vw,60px) 20px"}}><div style={{maxWidth:1120,margin:"auto"}}><a href="/" onClick={onBack}>← Back to Home</a><h1 style={{color:"#10213e",fontSize:48}}>All Products</h1><p>Explore our digital books and learning resources.</p><div style={{display:"grid",gridTemplateColumns:"repeat(auto-fit,minmax(min(100%,300px),1fr))",gap:24}}>{visible.map(p=><article key={p.id} style={{background:"#fff",border:"1px solid #dce8f8",borderRadius:20,padding:20,display:"flex",flexDirection:"column"}}><div style={{height:260,display:"grid",placeItems:"center",background:"#f3f8ff",borderRadius:14,overflow:"hidden"}}>{p.thumbnail_path?<img src={p.thumbnail_path} alt={p.title+" cover"} style={{width:"100%",height:"100%",objectFit:"contain"}}/>:<span>Product preview</span>}</div><h2>{p.title}</h2><p style={{flex:1}}>{p.description}</p><div style={{display:"flex",justifyContent:"space-between",alignItems:"center",gap:10}}><strong style={{fontSize:26,color:"#0754bd"}}>{formatProductPrice(p)}</strong>{p.gumroad_url&&<a href={p.gumroad_url} target="_blank" rel="noreferrer" style={{background:"#075fe4",color:"#fff",padding:"12px 16px",borderRadius:10,textDecoration:"none",fontWeight:800}}>Buy Now</a>}</div></article>)}</div>{visible.length===0&&<p>Products coming soon. Please check back later.</p>}</div></div>;
+ return <div className="public-site all-products-page"><div className="all-products-inner">
+   <a className="products-back-link" href="/" onClick={onBack}>← Back to Home</a>
+   <div className="all-products-heading"><span>✦ SK DIGITAL STORE</span><h1>All Digital Products</h1><p>Explore our complete collection of digital books and learning resources.</p></div>
+   <div className="products-grid">{visible.map((p,index)=><article className="store-product-card" key={p.id}>
+     <div className="store-product-art">{p.thumbnail_path?<img src={p.thumbnail_path} alt={p.title+" cover"} loading="lazy"/>:<div className="store-product-placeholder"><WalletCards size={42}/><span>SK DIGITAL PRODUCT</span></div>}{index===0&&<span className="store-product-ribbon">POPULAR</span>}</div>
+     <div className="store-product-copy"><span className="store-product-label">DIGITAL DOWNLOAD</span><h3>{p.title}</h3><p>{p.description||"Instant access to a useful digital resource."}</p><div className="store-product-buy"><strong>{formatProductPrice(p)}</strong>{safeUrl(p.gumroad_url)&&<a href={safeUrl(p.gumroad_url)} target="_blank" rel="noopener noreferrer">Buy Now <ArrowRight size={16}/></a>}</div></div>
+   </article>)}</div>
+   {visible.length===0&&<p className="products-empty">Products coming soon. Please check back later.</p>}
+ </div></div>;
 }
 
 /* =========================================================
@@ -1470,6 +1508,8 @@ export default function App() {
   const [selectedCat, setSelectedCat] =
     useState("latest");
 
+  const [showAllJobs, setShowAllJobs] = useState(false);
+
   const [mobileNav, setMobileNav] =
     useState(false);
 
@@ -1629,11 +1669,13 @@ export default function App() {
     let arr = [...gov];
 
     if (selectedCat !== "latest") {
-      arr = arr.filter(
-        r =>
-          jobCat(r) ===
-          selectedCat
-      );
+      arr = arr.filter(r => {
+        const text = [r.job_category,r.category,r.qualification,r.eligibility,r.title].filter(Boolean).join(" ").toLowerCase();
+        if (selectedCat === "10th") return /10(th)?\s*(pass|class|standard)?|ssc/.test(text);
+        if (selectedCat === "12th") return /12(th)?\s*(pass|class|standard)?|hsc|higher secondary/.test(text);
+        if (selectedCat === "graduation") return /graduat|graduate|degree|bachelor|b\.a\b|b\.sc|b\.com|btech|b\.tech|post graduate|master/.test(text);
+        return jobCat(r) === selectedCat;
+      });
     }
 
     if (q) {
@@ -2062,11 +2104,10 @@ export default function App() {
                       ? "selected"
                       : ""
                   }
-                  onClick={() =>
-                    setSelectedCat(
-                      slug
-                    )
-                  }
+                  onClick={() => {
+                    setSelectedCat(slug);
+                    setShowAllJobs(false);
+                  }}
                 >
 
                   <span
@@ -2136,11 +2177,10 @@ export default function App() {
                 </div>
 
                 <button
-                  onClick={() =>
-                    setSelectedCat(
-                      "latest"
-                    )
-                  }
+                  onClick={() => {
+                    setSelectedCat("latest");
+                    setShowAllJobs(true);
+                  }}
                 >
                   View All
                   <ArrowRight size={16} />
@@ -2156,7 +2196,7 @@ export default function App() {
                 <div className="job-list">
 
                   {filtered
-                    .slice(0, 8)
+                    .slice(0, showAllJobs ? filtered.length : 8)
                     .map(r => (
                       <JobCard
                         key={r.id}
@@ -2177,13 +2217,9 @@ export default function App() {
               {filtered.length > 8 && (
                 <button
                   className="view-all-btn"
-                  onClick={() =>
-                    setSelectedCat(
-                      selectedCat
-                    )
-                  }
+                  onClick={() => setShowAllJobs(v => !v)}
                 >
-                  View All Jobs
+                  {showAllJobs ? "Show Less" : "View All Jobs"}
                   <ArrowRight />
                 </button>
               )}
