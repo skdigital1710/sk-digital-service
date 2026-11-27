@@ -377,7 +377,10 @@ function PopupPromotion({p}) {
    FEATURED PRODUCTS
    ========================================================= */
 
-function formatProductPrice(product) { const currency=product.currency||"USD"; const symbol=currency==="INR"?"₹":currency==="AED"?"AED ":"$"; return symbol+Number(product.price||0).toFixed(2); }
+const AZ_ALPHABET_GUMROAD_URL="https://qsaim.gumroad.com/l/az-alphabet-writing-book1?layout=profile";
+function isAZAlphabetBook(product){return /a\s*to\s*z.*alphabet.*writing|alphabet.*writing.*book/i.test(product?.title||"");}
+function productBuyUrl(product){return isAZAlphabetBook(product)?AZ_ALPHABET_GUMROAD_URL:safeUrl(product?.gumroad_url);}
+function formatProductPrice(product) { if(isAZAlphabetBook(product))return "₹79"; const currency=product.currency||"USD"; const symbol=currency==="INR"?"₹":currency==="AED"?"AED ":"$"; return symbol+Number(product.price||0).toFixed(2); }
 function ProductsSection({products=[]}) {
  const product=products.find(p=>p.status==="active"&&p.show_on_home!==false);
  if(!product)return null;
@@ -395,7 +398,7 @@ function ProductsSection({products=[]}) {
          <span className="store-product-label">FEATURED DIGITAL PRODUCT</span>
          <h3>{product.title}</h3>
          <p>{product.description||"Instant access to a useful digital resource."}</p>
-         <div className="store-product-buy"><strong>{formatProductPrice(product)}</strong><a className="explore-products-cta" href="/products">Explore Products <ArrowRight size={16}/></a></div>
+         <div className="store-product-buy"><strong>{formatProductPrice(product)}</strong>{productBuyUrl(product)&&<a className="explore-products-cta" href={productBuyUrl(product)} target="_blank" rel="noopener noreferrer">View Product <ArrowRight size={16}/></a>}</div>
        </div>
      </article>
    </div>
@@ -408,7 +411,7 @@ function AllProductsPage({onBack,products=[]}) {
    <div className="all-products-heading"><span>✦ SK DIGITAL STORE</span><h1>All Digital Products</h1><p>Explore our complete collection of digital books and learning resources.</p></div>
    <div className="products-grid">{visible.map((p,index)=><article className="store-product-card" key={p.id}>
      <div className="store-product-art">{p.thumbnail_path?<img src={p.thumbnail_path} alt={p.title+" cover"} loading="lazy"/>:<div className="store-product-placeholder"><WalletCards size={42}/><span>SK DIGITAL PRODUCT</span></div>}{index===0&&<span className="store-product-ribbon">POPULAR</span>}</div>
-     <div className="store-product-copy"><span className="store-product-label">DIGITAL DOWNLOAD</span><h3>{p.title}</h3><p>{p.description||"Instant access to a useful digital resource."}</p><div className="store-product-buy"><strong>{formatProductPrice(p)}</strong>{safeUrl(p.gumroad_url)&&<a href={safeUrl(p.gumroad_url)} target="_blank" rel="noopener noreferrer">Buy Now <ArrowRight size={16}/></a>}</div></div>
+     <div className="store-product-copy"><span className="store-product-label">DIGITAL DOWNLOAD</span><h3>{p.title}</h3><p>{p.description||"Instant access to a useful digital resource."}</p><div className="store-product-buy"><strong>{formatProductPrice(p)}</strong>{productBuyUrl(p)&&<a href={productBuyUrl(p)} target="_blank" rel="noopener noreferrer">Buy Now <ArrowRight size={16}/></a>}</div></div>
    </article>)}</div>
    {visible.length===0&&<p className="products-empty">Products coming soon. Please check back later.</p>}
  </div></div>;
@@ -2022,7 +2025,7 @@ export default function App() {
 
                 {products.find(p=>p.status==="active"&&p.show_on_home!==false) && (() => {
                   const fp=products.find(p=>p.status==="active"&&p.show_on_home!==false);
-                  return <a className="hero-floating-product" href="/products" aria-label={"Explore "+fp.title}>
+                  return <a className="hero-floating-product" href={productBuyUrl(fp)||"/products"} target={productBuyUrl(fp)?"_blank":undefined} rel={productBuyUrl(fp)?"noopener noreferrer":undefined} aria-label={"Explore "+fp.title}>
                     <span className="hero-floating-product-art">
                       {fp.thumbnail_path?<img src={fp.thumbnail_path} alt="" loading="lazy"/>:<WalletCards size={28}/>}
                     </span>
