@@ -348,6 +348,87 @@ function Promotion({ p, compact = false }) {
   );
 }
 
+
+function PopupPromotion({ p, pageKey }) {
+  const [visible, setVisible] = useState(false);
+
+  useEffect(() => {
+    setVisible(false);
+    if (!p?.id) return undefined;
+    const timer = window.setTimeout(() => setVisible(true), 450);
+    return () => window.clearTimeout(timer);
+  }, [p?.id, pageKey]);
+
+  if (!p || !visible) return null;
+  const url = safeUrl(p.button_url);
+
+  return (
+    <div className="sk-ad-popup-backdrop" role="presentation" onMouseDown={e => {
+      if (e.target === e.currentTarget) setVisible(false);
+    }}>
+      <section className="sk-ad-popup" role="dialog" aria-modal="true" aria-label={p.title || "Advertisement"}>
+        <button className="sk-ad-popup-close" type="button" onClick={() => setVisible(false)} aria-label="Close advertisement">×</button>
+        {p.image_url && <img src={p.image_url} alt="" loading="lazy" />}
+        <div className="sk-ad-popup-copy">
+          <span>SPONSORED</span>
+          <h2>{p.title}</h2>
+          {p.description && <p>{p.description}</p>}
+          {url && <a href={url} target="_blank" rel="noreferrer">{p.button_text || "View Now"} <ArrowRight size={16}/></a>}
+        </div>
+      </section>
+    </div>
+  );
+}
+
+function GlobalAdShell({ children, promotions = [], settings, pageKey = "/" }) {
+  const [mobileOpen, setMobileOpen] = useState(false);
+  const cfg = {
+    speed: 50, width: 190, cardHeight: 176, imageHeight: 110,
+    gap: 12, direction: "up", showMobile: true,
+    ...(settings?.ad_display_settings || {})
+  };
+  const sidebarAds = promotions
+    .filter(p => p.placement === "sidebar")
+    .sort((a, b) => (Number(a.display_order) || 0) - (Number(b.display_order) || 0))
+    .slice(0, 10);
+  const cssVars = {
+    "--global-ad-width": `${Math.min(280, Math.max(140, Number(cfg.width) || 190))}px`,
+    "--global-ad-card-height": `${Math.min(320, Math.max(120, Number(cfg.cardHeight) || 176))}px`,
+    "--global-ad-image-height": `${Math.min(220, Math.max(60, Number(cfg.imageHeight) || 110))}px`,
+    "--global-ad-gap": `${Math.min(40, Math.max(0, Number(cfg.gap) || 0))}px`,
+    "--global-ad-duration": `${Math.min(240, Math.max(12, Number(cfg.speed) || 50))}s`,
+    "--global-ad-direction": cfg.direction === "down" ? "reverse" : "normal"
+  };
+
+  return (
+    <div className="global-ad-shell" style={cssVars}>
+      {sidebarAds.length > 0 && cfg.showMobile !== false && (
+        <aside className={`global-ad-rail ${mobileOpen ? "is-open" : ""}`} aria-label="Sponsored advertisements">
+          <div className="global-ad-rail-head">
+            <span>✦ SPONSORED</span>
+            <button type="button" onClick={() => setMobileOpen(v => !v)} aria-label="Toggle advertisements">{mobileOpen ? "−" : "＋"}</button>
+          </div>
+          <div className="global-ad-rail-window">
+            <div className="global-ad-rail-track">
+              {[...sidebarAds, ...sidebarAds].map((promo, index) => (
+                <div className="global-ad-rail-card" key={`${promo.id}-${index}`}>
+                  <Promotion p={promo} compact />
+                  <small>ADVERTISEMENT</small>
+                </div>
+              ))}
+            </div>
+          </div>
+        </aside>
+      )}
+      <div className="global-ad-content">{children}</div>
+      <PopupPromotion
+        p={promotions.find(p => p.placement === "popup") || null}
+        pageKey={pageKey}
+      />
+    </div>
+  );
+}
+
 /* =========================================================
    FEATURED PRODUCTS
    ========================================================= */
