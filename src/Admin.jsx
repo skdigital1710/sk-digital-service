@@ -276,7 +276,6 @@ function Admin() {
             </div>
 
             <div className="settings-card settings-card-wide">
-              <div className="settings-card-title"><div className="settings-icon green">✓</div><div><div className="settings-card settings-card-wide">
               <div className="settings-card-title"><div className="settings-icon blue"><Megaphone/></div><div><h3>Global Advertisement Display</h3><p>Har public page par sidebar ads ka size, speed aur behaviour.</p></div></div>
               <div className="settings-fields two-col">
                 <label>Scroll speed (seconds per loop)<input type="number" min="12" max="240" value={siteForm.ad_display_settings?.speed??50} onChange={e=>setSiteForm({...siteForm,ad_display_settings:{...DEFAULT_SITE_SETTINGS.ad_display_settings,...siteForm.ad_display_settings,speed:Number(e.target.value)}})}/></label>
@@ -290,7 +289,8 @@ function Admin() {
               <p className="admin-hint">Popup ads display on every page navigation. Close karne ke baad same page par dobara nahi khulega; next page visit par active popup dobara dikhega.</p>
             </div>
 
-            <h3>Public Sections</h3><p>Website ke sections ko ON / OFF karo.</p></div></div>
+            <div className="settings-card settings-card-wide">
+              <div className="settings-card-title"><div className="settings-icon green">✓</div><div><h3>Public Sections</h3><p>Website ke sections ko ON / OFF karo.</p></div></div>
               <div className="settings-switch-grid">
                 {[['show_hero','Hero Section','Homepage ka main hero'],['show_categories','Categories','Job/resource categories'],['show_latest_jobs','Latest Jobs','Latest government jobs'],['show_promotions','Promotions','Ads & promotional banners'],['show_whatsapp_cta','WhatsApp CTA','WhatsApp channel CTA'],['show_social_cta','Instagram + YouTube CTA','Social follow/subscribe block']].map(([key,label,desc])=><label className="settings-toggle" key={key}><span><strong>{label}</strong><small>{desc}</small></span><input type="checkbox" checked={!!siteForm[key]} onChange={e=>setSiteForm({...siteForm,[key]:e.target.checked})}/><i/></label>)}
               </div>
