@@ -248,21 +248,7 @@ function Admin() {
             </div>
 
             <div className="settings-card">
-              <div className="settings-card-title"><div className="settings-icon blue">W</div><div><h3>WhatsApp</h3><p>Channel CTA<div className="settings-card settings-card-wide">
-              <div className="settings-card-title"><div className="settings-icon blue"><Megaphone/></div><div><h3>Global Advertisement Display</h3><p>Har public page par sidebar ads ka size, speed aur behaviour.</p></div></div>
-              <div className="settings-fields two-col">
-                <label>Scroll speed (seconds per loop)<input type="number" min="12" max="240" value={siteForm.ad_display_settings?.speed??50} onChange={e=>setSiteForm({...siteForm,ad_display_settings:{...DEFAULT_SITE_SETTINGS.ad_display_settings,...siteForm.ad_display_settings,speed:Number(e.target.value)}})}/></label>
-                <label>Sidebar width (px)<input type="number" min="140" max="280" value={siteForm.ad_display_settings?.width??190} onChange={e=>setSiteForm({...siteForm,ad_display_settings:{...DEFAULT_SITE_SETTINGS.ad_display_settings,...siteForm.ad_display_settings,width:Number(e.target.value)}})}/></label>
-                <label>Ad card height (px)<input type="number" min="120" max="320" value={siteForm.ad_display_settings?.cardHeight??176} onChange={e=>setSiteForm({...siteForm,ad_display_settings:{...DEFAULT_SITE_SETTINGS.ad_display_settings,...siteForm.ad_display_settings,cardHeight:Number(e.target.value)}})}/></label>
-                <label>Image height (px)<input type="number" min="60" max="220" value={siteForm.ad_display_settings?.imageHeight??110} onChange={e=>setSiteForm({...siteForm,ad_display_settings:{...DEFAULT_SITE_SETTINGS.ad_display_settings,...siteForm.ad_display_settings,imageHeight:Number(e.target.value)}})}/></label>
-                <label>Gap between ads (px)<input type="number" min="0" max="40" value={siteForm.ad_display_settings?.gap??12} onChange={e=>setSiteForm({...siteForm,ad_display_settings:{...DEFAULT_SITE_SETTINGS.ad_display_settings,...siteForm.ad_display_settings,gap:Number(e.target.value)}})}/></label>
-                <label>Scroll direction<select value={siteForm.ad_display_settings?.direction??"up"} onChange={e=>setSiteForm({...siteForm,ad_display_settings:{...DEFAULT_SITE_SETTINGS.ad_display_settings,...siteForm.ad_display_settings,direction:e.target.value}})}><option value="up">Bottom to Top</option><option value="down">Top to Bottom</option></select></label>
-              </div>
-              <label className="check-row"><input type="checkbox" checked={siteForm.ad_display_settings?.showMobile!==false} onChange={e=>setSiteForm({...siteForm,ad_display_settings:{...DEFAULT_SITE_SETTINGS.ad_display_settings,...siteForm.ad_display_settings,showMobile:e.target.checked}})}/><span>Show compact ad panel on mobile</span></label>
-              <p className="admin-hint">Popup ads display on every page navigation. Close karne ke baad same page par dobara nahi khulega; next page visit par active popup dobara dikhega.</p>
-            </div>
-
-             settings.</p></div></div>
+              <div className="settings-card-title"><div className="settings-icon blue">W</div><div><h3>WhatsApp</h3><p>Channel CTA settings.</p></div></div>
               <label>WhatsApp Channel URL<input type="url" value={siteForm.whatsapp_channel_url||''} onChange={e=>setSiteForm({...siteForm,whatsapp_channel_url:e.target.value})} placeholder="https://whatsapp.com/channel/..."/></label>
               <label>CTA Text<input value={siteForm.whatsapp_cta_text||''} onChange={e=>setSiteForm({...siteForm,whatsapp_cta_text:e.target.value})} placeholder="Join WhatsApp Channel"/></label>
             </div>
@@ -290,7 +276,21 @@ function Admin() {
             </div>
 
             <div className="settings-card settings-card-wide">
-              <div className="settings-card-title"><div className="settings-icon green">✓</div><div><h3>Public Sections</h3><p>Website ke sections ko ON / OFF karo.</p></div></div>
+              <div className="settings-card-title"><div className="settings-icon green">✓</div><div><div className="settings-card settings-card-wide">
+              <div className="settings-card-title"><div className="settings-icon blue"><Megaphone/></div><div><h3>Global Advertisement Display</h3><p>Har public page par sidebar ads ka size, speed aur behaviour.</p></div></div>
+              <div className="settings-fields two-col">
+                <label>Scroll speed (seconds per loop)<input type="number" min="12" max="240" value={siteForm.ad_display_settings?.speed??50} onChange={e=>setSiteForm({...siteForm,ad_display_settings:{...DEFAULT_SITE_SETTINGS.ad_display_settings,...siteForm.ad_display_settings,speed:Number(e.target.value)}})}/></label>
+                <label>Sidebar width (px)<input type="number" min="140" max="280" value={siteForm.ad_display_settings?.width??190} onChange={e=>setSiteForm({...siteForm,ad_display_settings:{...DEFAULT_SITE_SETTINGS.ad_display_settings,...siteForm.ad_display_settings,width:Number(e.target.value)}})}/></label>
+                <label>Ad card height (px)<input type="number" min="120" max="320" value={siteForm.ad_display_settings?.cardHeight??176} onChange={e=>setSiteForm({...siteForm,ad_display_settings:{...DEFAULT_SITE_SETTINGS.ad_display_settings,...siteForm.ad_display_settings,cardHeight:Number(e.target.value)}})}/></label>
+                <label>Image height (px)<input type="number" min="60" max="220" value={siteForm.ad_display_settings?.imageHeight??110} onChange={e=>setSiteForm({...siteForm,ad_display_settings:{...DEFAULT_SITE_SETTINGS.ad_display_settings,...siteForm.ad_display_settings,imageHeight:Number(e.target.value)}})}/></label>
+                <label>Gap between ads (px)<input type="number" min="0" max="40" value={siteForm.ad_display_settings?.gap??12} onChange={e=>setSiteForm({...siteForm,ad_display_settings:{...DEFAULT_SITE_SETTINGS.ad_display_settings,...siteForm.ad_display_settings,gap:Number(e.target.value)}})}/></label>
+                <label>Scroll direction<select value={siteForm.ad_display_settings?.direction??"up"} onChange={e=>setSiteForm({...siteForm,ad_display_settings:{...DEFAULT_SITE_SETTINGS.ad_display_settings,...siteForm.ad_display_settings,direction:e.target.value}})}><option value="up">Bottom to Top</option><option value="down">Top to Bottom</option></select></label>
+              </div>
+              <label className="check-row"><input type="checkbox" checked={siteForm.ad_display_settings?.showMobile!==false} onChange={e=>setSiteForm({...siteForm,ad_display_settings:{...DEFAULT_SITE_SETTINGS.ad_display_settings,...siteForm.ad_display_settings,showMobile:e.target.checked}})}/><span>Show compact ad panel on mobile</span></label>
+              <p className="admin-hint">Popup ads display on every page navigation. Close karne ke baad same page par dobara nahi khulega; next page visit par active popup dobara dikhega.</p>
+            </div>
+
+            <h3>Public Sections</h3><p>Website ke sections ko ON / OFF karo.</p></div></div>
               <div className="settings-switch-grid">
                 {[['show_hero','Hero Section','Homepage ka main hero'],['show_categories','Categories','Job/resource categories'],['show_latest_jobs','Latest Jobs','Latest government jobs'],['show_promotions','Promotions','Ads & promotional banners'],['show_whatsapp_cta','WhatsApp CTA','WhatsApp channel CTA'],['show_social_cta','Instagram + YouTube CTA','Social follow/subscribe block']].map(([key,label,desc])=><label className="settings-toggle" key={key}><span><strong>{label}</strong><small>{desc}</small></span><input type="checkbox" checked={!!siteForm[key]} onChange={e=>setSiteForm({...siteForm,[key]:e.target.checked})}/><i/></label>)}
               </div>
