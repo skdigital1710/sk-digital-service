@@ -31,6 +31,9 @@ const JOB_CATS = [
   ["Defence", "defence", ShieldCheck, "#e5384a"],
   ["Police", "police", Star, "#1c4fa8"],
   ["Teaching", "teaching", GraduationCap, "#0b8a57"],
+  ["10th Pass", "10th", GraduationCap, "#0b8a57"],
+  ["12th Pass", "12th", GraduationCap, "#0b63d6"],
+  ["Graduation", "graduation", GraduationCap, "#7c3aed"],
   ["Other", "other", Grid3x3, "#5b6b82"]
 ];
 
@@ -108,11 +111,13 @@ function deadline(v) {
 }
 
 function jobCat(r) {
-  const s = String(
-    r?.job_category ||
-    r?.category ||
-    "other"
-  ).toLowerCase();
+  const s = [
+    r?.job_category,
+    r?.category,
+    r?.qualification,
+    r?.eligibility,
+    r?.title
+  ].filter(Boolean).join(" ").toLowerCase();
 
   for (const [name, slug] of JOB_CATS) {
     if (
@@ -343,20 +348,129 @@ function Promotion({ p, compact = false }) {
   );
 }
 
+
+function PopupPromotion({ p, pageKey }) {
+  const [visible, setVisible] = useState(false);
+
+  useEffect(() => {
+    setVisible(false);
+    if (!p?.id) return undefined;
+    const timer = window.setTimeout(() => setVisible(true), 450);
+    return () => window.clearTimeout(timer);
+  }, [p?.id, pageKey]);
+
+  if (!p || !visible) return null;
+  const url = safeUrl(p.button_url);
+
+  return (
+    <div className="sk-ad-popup-backdrop" role="presentation" onMouseDown={e => {
+      if (e.target === e.currentTarget) setVisible(false);
+    }}>
+      <section className="sk-ad-popup" role="dialog" aria-modal="true" aria-label={p.title || "Advertisement"}>
+        <button className="sk-ad-popup-close" type="button" onClick={() => setVisible(false)} aria-label="Close advertisement">×</button>
+        {p.image_url && <img src={p.image_url} alt="" loading="lazy" />}
+        <div className="sk-ad-popup-copy">
+          <span>SPONSORED</span>
+          <h2>{p.title}</h2>
+          {p.description && <p>{p.description}</p>}
+          {url && <a href={url} target="_blank" rel="noreferrer">{p.button_text || "View Now"} <ArrowRight size={16}/></a>}
+        </div>
+      </section>
+    </div>
+  );
+}
+
+function GlobalAdShell({ children, promotions = [], settings, pageKey = "/" }) {
+  const [mobileOpen, setMobileOpen] = useState(false);
+  const cfg = {
+    speed: 50, width: 190, cardHeight: 176, imageHeight: 110,
+    gap: 12, direction: "up", showMobile: true,
+    ...(settings?.ad_display_settings || {})
+  };
+  const sidebarAds = promotions
+    .filter(p => p.placement === "sidebar")
+    .sort((a, b) => (Number(a.display_order) || 0) - (Number(b.display_order) || 0))
+    .slice(0, 10);
+  const cssVars = {
+    "--global-ad-width": `${Math.min(280, Math.max(140, Number(cfg.width) || 190))}px`,
+    "--global-ad-card-height": `${Math.min(320, Math.max(120, Number(cfg.cardHeight) || 176))}px`,
+    "--global-ad-image-height": `${Math.min(220, Math.max(60, Number(cfg.imageHeight) || 110))}px`,
+    "--global-ad-gap": `${Math.min(40, Math.max(0, Number(cfg.gap) || 0))}px`,
+    "--global-ad-duration": `${Math.min(240, Math.max(12, Number(cfg.speed) || 50))}s`,
+    "--global-ad-direction": cfg.direction === "down" ? "reverse" : "normal"
+  };
+
+  return (
+    <div className="global-ad-shell" style={cssVars}>
+      {sidebarAds.length > 0 && cfg.showMobile !== false && (
+        <aside className={`global-ad-rail ${mobileOpen ? "is-open" : ""}`} aria-label="Sponsored advertisements">
+          <div className="global-ad-rail-head">
+            <span>✦ SPONSORED</span>
+            <button type="button" onClick={() => setMobileOpen(v => !v)} aria-label="Toggle advertisements">{mobileOpen ? "−" : "＋"}</button>
+          </div>
+          <div className="global-ad-rail-window">
+            <div className="global-ad-rail-track">
+              {[...sidebarAds, ...sidebarAds].map((promo, index) => (
+                <div className="global-ad-rail-card" key={`${promo.id}-${index}`}>
+                  <Promotion p={promo} compact />
+                  <small>ADVERTISEMENT</small>
+                </div>
+              ))}
+            </div>
+          </div>
+        </aside>
+      )}
+      <div className="global-ad-content">{children}</div>
+      <PopupPromotion
+        p={promotions.find(p => p.placement === "popup") || null}
+        pageKey={pageKey}
+      />
+    </div>
+  );
+}
+
 /* =========================================================
    FEATURED PRODUCTS
    ========================================================= */
 
-function formatProductPrice(product) { const currency=product.currency||"USD"; const symbol=currency==="INR"?"₹":currency==="AED"?"AED ":"$"; return symbol+Number(product.price||0).toFixed(2); }
+const AZ_ALPHABET_GUMROAD_URL="https://qsaim.gumroad.com/l/az-alphabet-writing-book1?layout=profile";
+function isAZAlphabetBook(product){return /a\s*to\s*z.*alphabet.*writing|alphabet.*writing.*book/i.test(product?.title||"");}
+function productBuyUrl(product){return isAZAlphabetBook(product)?AZ_ALPHABET_GUMROAD_URL:safeUrl(product?.gumroad_url);}
+function formatProductPrice(product) { if(isAZAlphabetBook(product))return "₹79"; const currency=product.currency||"USD"; const symbol=currency==="INR"?"₹":currency==="AED"?"AED ":"$"; return symbol+Number(product.price||0).toFixed(2); }
 function ProductsSection({products=[]}) {
- const product=products.find(p=>p.status==="active"&&p.show_on_home);
+ const product=products.find(p=>p.status==="active"&&p.show_on_home!==false);
  if(!product)return null;
- const btn={display:"inline-flex",alignItems:"center",gap:10,borderRadius:14,padding:"14px 18px",background:"linear-gradient(135deg,#075fe4,#0a3b91)",color:"#fff",fontWeight:800,textDecoration:"none"};
- return <section id="products" style={{padding:"45px 20px",margin:"28px auto",background:"linear-gradient(135deg,#edf5ff,#fff 55%,#fff3e7)"}}><div style={{maxWidth:1080,margin:"auto",display:"grid",gridTemplateColumns:"repeat(auto-fit,minmax(min(100%,330px),1fr))",gap:28,alignItems:"center"}}><div><span>✦ FEATURED PRODUCT</span><h2 style={{fontSize:"clamp(30px,4vw,46px)",color:"#10213e"}}>{product.title}</h2><p style={{color:"#52627a",lineHeight:1.7}}>{product.description}</p><strong style={{fontSize:32,color:"#0754bd"}}>{formatProductPrice(product)}</strong> {product.gumroad_url&&<a href={product.gumroad_url} target="_blank" rel="noreferrer" style={btn}>Buy Now <ArrowRight size={18}/></a>}<p><a href="/products">View All Products →</a></p></div><div style={{background:"#fff",borderRadius:22,padding:14}}>{product.thumbnail_path?<img src={product.thumbnail_path} alt={product.title+" cover"} style={{width:"100%",maxHeight:420,objectFit:"contain"}}/>:<div>Product preview</div>}</div></div></section>;
+ return <section id="products" className="products-showcase products-featured-only">
+   <div className="products-showcase-inner">
+     <div className="products-featured-heading">
+       <div><span className="products-kicker"><Sparkles size={15}/> SK DIGITAL STORE</span><h2>Digital Products</h2></div>
+       <b>Learn • Grow • Explore</b>
+     </div>
+     <article className="store-product-card featured-product-card">
+       <div className="store-product-art">
+         {product.thumbnail_path?<img src={product.thumbnail_path} alt={product.title+" cover"} loading="lazy"/>:<div className="store-product-placeholder"><WalletCards size={42}/><span>SK DIGITAL PRODUCT</span></div>}
+       </div>
+       <div className="store-product-copy">
+         <span className="store-product-label">FEATURED DIGITAL PRODUCT</span>
+         <h3>{product.title}</h3>
+         <p>{product.description||"Instant access to a useful digital resource."}</p>
+         <div className="store-product-buy"><strong>{formatProductPrice(product)}</strong>{productBuyUrl(product)&&<a className="explore-products-cta" href={productBuyUrl(product)} target="_blank" rel="noopener noreferrer">View Product <ArrowRight size={16}/></a>}</div>
+       </div>
+     </article>
+   </div>
+ </section>;
 }
 function AllProductsPage({onBack,products=[]}) {
  const visible=products.filter(p=>p.status==="active"&&p.show_on_products!==false);
- return <div className="public-site" style={{minHeight:"70vh",background:"linear-gradient(145deg,#f2f7ff,#fff 65%,#fff7ed)",padding:"clamp(24px,5vw,60px) 20px"}}><div style={{maxWidth:1120,margin:"auto"}}><a href="/" onClick={onBack}>← Back to Home</a><h1 style={{color:"#10213e",fontSize:48}}>All Products</h1><p>Explore our digital books and learning resources.</p><div style={{display:"grid",gridTemplateColumns:"repeat(auto-fit,minmax(min(100%,300px),1fr))",gap:24}}>{visible.map(p=><article key={p.id} style={{background:"#fff",border:"1px solid #dce8f8",borderRadius:20,padding:20,display:"flex",flexDirection:"column"}}><div style={{height:260,display:"grid",placeItems:"center",background:"#f3f8ff",borderRadius:14,overflow:"hidden"}}>{p.thumbnail_path?<img src={p.thumbnail_path} alt={p.title+" cover"} style={{width:"100%",height:"100%",objectFit:"contain"}}/>:<span>Product preview</span>}</div><h2>{p.title}</h2><p style={{flex:1}}>{p.description}</p><div style={{display:"flex",justifyContent:"space-between",alignItems:"center",gap:10}}><strong style={{fontSize:26,color:"#0754bd"}}>{formatProductPrice(p)}</strong>{p.gumroad_url&&<a href={p.gumroad_url} target="_blank" rel="noreferrer" style={{background:"#075fe4",color:"#fff",padding:"12px 16px",borderRadius:10,textDecoration:"none",fontWeight:800}}>Buy Now</a>}</div></article>)}</div>{visible.length===0&&<p>Products coming soon. Please check back later.</p>}</div></div>;
+ return <div className="public-site all-products-page"><div className="all-products-inner">
+   <a className="products-back-link" href="/" onClick={onBack}>← Back to Home</a>
+   <div className="all-products-heading"><span>✦ SK DIGITAL STORE</span><h1>All Digital Products</h1><p>Explore our complete collection of digital books and learning resources.</p></div>
+   <div className="products-grid">{visible.map((p,index)=><article className="store-product-card" key={p.id}>
+     <div className="store-product-art">{p.thumbnail_path?<img src={p.thumbnail_path} alt={p.title+" cover"} loading="lazy"/>:<div className="store-product-placeholder"><WalletCards size={42}/><span>SK DIGITAL PRODUCT</span></div>}{index===0&&<span className="store-product-ribbon">POPULAR</span>}</div>
+     <div className="store-product-copy"><span className="store-product-label">DIGITAL DOWNLOAD</span><h3>{p.title}</h3><p>{p.description||"Instant access to a useful digital resource."}</p><div className="store-product-buy"><strong>{formatProductPrice(p)}</strong>{productBuyUrl(p)&&<a href={productBuyUrl(p)} target="_blank" rel="noopener noreferrer">Buy Now <ArrowRight size={16}/></a>}</div></div>
+   </article>)}</div>
+   {visible.length===0&&<p className="products-empty">Products coming soon. Please check back later.</p>}
+ </div></div>;
 }
 
 /* =========================================================
@@ -1470,6 +1584,8 @@ export default function App() {
   const [selectedCat, setSelectedCat] =
     useState("latest");
 
+  const [showAllJobs, setShowAllJobs] = useState(false);
+
   const [mobileNav, setMobileNav] =
     useState(false);
 
@@ -1629,11 +1745,13 @@ export default function App() {
     let arr = [...gov];
 
     if (selectedCat !== "latest") {
-      arr = arr.filter(
-        r =>
-          jobCat(r) ===
-          selectedCat
-      );
+      arr = arr.filter(r => {
+        const text = [r.job_category,r.category,r.qualification,r.eligibility,r.title].filter(Boolean).join(" ").toLowerCase();
+        if (selectedCat === "10th") return /10(th)?\s*(pass|class|standard)?|ssc/.test(text);
+        if (selectedCat === "12th") return /12(th)?\s*(pass|class|standard)?|hsc|higher secondary/.test(text);
+        if (selectedCat === "graduation") return /graduat|graduate|degree|bachelor|b\.a\b|b\.sc|b\.com|btech|b\.tech|post graduate|master/.test(text);
+        return jobCat(r) === selectedCat;
+      });
     }
 
     if (q) {
@@ -1683,23 +1801,13 @@ export default function App() {
     ) ||
     YT_FALLBACK;
 
-  const topPromos =
-    promotions.filter(
-      p =>
-        p.placement === "top"
-    );
-
-  const sidePromos =
-    promotions.filter(
-      p =>
-        p.placement === "sidebar"
-    );
-
-  const bottomPromos =
-    promotions.filter(
-      p =>
-        p.placement === "bottom"
-    );
+  const now = Date.now();
+  const scheduledPromotions = promotions.filter(p =>
+    (!p.start_at || new Date(p.start_at).getTime() <= now) &&
+    (!p.end_at || new Date(p.end_at).getTime() >= now)
+  );
+  const topPromos = scheduledPromotions.filter(p => p.placement === "top" || p.placement === "latest_jobs");
+  const bottomPromos = scheduledPromotions.filter(p => p.placement === "bottom");
 
   const openJob = r => {
 
@@ -1746,6 +1854,7 @@ export default function App() {
 
     if (r) {
       return (
+        <GlobalAdShell promotions={scheduledPromotions} settings={settings} pageKey={route}>
         <JobDetail
           r={r}
           resources={resources}
@@ -1760,12 +1869,13 @@ export default function App() {
           }}
           wa={wa}
         />
+        </GlobalAdShell>
       );
     }
   }
 
   if (route === "/products") {
-    return <AllProductsPage products={products} onBack={(event) => { if (event && event.preventDefault) event.preventDefault(); history.pushState({}, "", "/"); setRoute("/"); window.scrollTo(0, 0); }} />;
+    return <GlobalAdShell promotions={scheduledPromotions} settings={settings} pageKey={route}><AllProductsPage products={products} onBack={(event) => { if (event && event.preventDefault) event.preventDefault(); history.pushState({}, "", "/"); setRoute("/"); window.scrollTo(0, 0); }} /></GlobalAdShell>;
   }
 
   /* =======================================================
@@ -1773,6 +1883,7 @@ export default function App() {
      ======================================================= */
 
   return (
+    <GlobalAdShell promotions={scheduledPromotions} settings={settings} pageKey={route}>
     <SocialFollowGate
       instagramUrl={ig}
       youtubeUrl={yt}
@@ -1818,13 +1929,13 @@ export default function App() {
 
                 <h1>
                   {settings?.hero_title ||
-                    "Your Dream Job"}
+                    "Your Career. Your Growth."}
 
                   <br />
 
                   <mark>
                     {settings?.hero_highlight ||
-                      "Is Just a Click Away"}
+                      "One Trusted Platform."}
                   </mark>
                 </h1>
 
@@ -1968,6 +2079,21 @@ export default function App() {
                   Apply · Download · Get Done
                 </small>
 
+                {products.find(p=>p.status==="active"&&p.show_on_home!==false) && (() => {
+                  const fp=products.find(p=>p.status==="active"&&p.show_on_home!==false);
+                  return <a className="hero-floating-product" href={productBuyUrl(fp)||"/products"} target={productBuyUrl(fp)?"_blank":undefined} rel={productBuyUrl(fp)?"noopener noreferrer":undefined} aria-label={"Explore "+fp.title}>
+                    <span className="hero-floating-product-art">
+                      {fp.thumbnail_path?<img src={fp.thumbnail_path} alt="" loading="lazy"/>:<WalletCards size={28}/>}
+                    </span>
+                    <span className="hero-floating-product-copy">
+                      <small>FEATURED PRODUCT</small>
+                      <b>{fp.title}</b>
+                      <em>Explore Products <ArrowRight size={12}/></em>
+                    </span>
+                    <span className="hero-floating-product-spark">✦</span>
+                  </a>;
+                })()}
+
               </div>
 
               <div>
@@ -2014,31 +2140,6 @@ export default function App() {
           </section>
 
           {/* =================================================
-              TOP PROMOTIONS
-          ================================================= */}
-
-          {topPromos.length > 0 && (
-            <section className="shell promo-row">
-
-              {topPromos.map(
-                p => (
-                  <Promotion
-                    p={p}
-                    key={p.id}
-                  />
-                )
-              )}
-
-            </section>
-          )}
-
-          {/* =================================================
-              FEATURED PRODUCTS
-          ================================================= */}
-
-          <ProductsSection products={products} />
-
-          {/* =================================================
               JOB CATEGORIES
           ================================================= */}
 
@@ -2062,11 +2163,10 @@ export default function App() {
                       ? "selected"
                       : ""
                   }
-                  onClick={() =>
-                    setSelectedCat(
-                      slug
-                    )
-                  }
+                  onClick={() => {
+                    setSelectedCat(slug);
+                    setShowAllJobs(false);
+                  }}
                 >
 
                   <span
@@ -2136,11 +2236,10 @@ export default function App() {
                 </div>
 
                 <button
-                  onClick={() =>
-                    setSelectedCat(
-                      "latest"
-                    )
-                  }
+                  onClick={() => {
+                    setSelectedCat("latest");
+                    setShowAllJobs(true);
+                  }}
                 >
                   View All
                   <ArrowRight size={16} />
@@ -2156,7 +2255,7 @@ export default function App() {
                 <div className="job-list">
 
                   {filtered
-                    .slice(0, 8)
+                    .slice(0, showAllJobs ? filtered.length : 8)
                     .map(r => (
                       <JobCard
                         key={r.id}
@@ -2177,13 +2276,9 @@ export default function App() {
               {filtered.length > 8 && (
                 <button
                   className="view-all-btn"
-                  onClick={() =>
-                    setSelectedCat(
-                      selectedCat
-                    )
-                  }
+                  onClick={() => setShowAllJobs(v => !v)}
                 >
-                  View All Jobs
+                  {showAllJobs ? "Show Less" : "View All Jobs"}
                   <ArrowRight />
                 </button>
               )}
@@ -2310,21 +2405,38 @@ export default function App() {
 
               </div>
 
-              {/* SIDEBAR PROMOTIONS */}
-
-              {sidePromos.map(
-                p => (
-                  <Promotion
-                    key={p.id}
-                    p={p}
-                    compact
-                  />
-                )
-              )}
+              {/* LEFT SIDEBAR — CONTINUOUS VERTICAL AD TICKER */}
 
             </aside>
 
           </section>
+
+
+
+          {/* =================================================
+              TOP PROMOTIONS
+          ================================================= */}
+
+          {topPromos.length > 0 && (
+            <section className="shell promo-row">
+
+              {topPromos.map(
+                p => (
+                  <Promotion
+                    p={p}
+                    key={p.id}
+                  />
+                )
+              )}
+
+            </section>
+          )}
+
+          {/* =================================================
+              FEATURED PRODUCTS
+          ================================================= */}
+
+          <ProductsSection products={products} />
 
           {/* =================================================
               WHY SK DIGITAL SERVICE
@@ -2519,5 +2631,6 @@ export default function App() {
       </div>
 
     </SocialFollowGate>
+    </GlobalAdShell>
   );
 }
