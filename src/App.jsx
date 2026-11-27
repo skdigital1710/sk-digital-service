@@ -348,6 +348,24 @@ function Promotion({ p, compact = false }) {
   );
 }
 
+function SidebarAdTicker({promotions=[]}) {
+ const items=promotions.slice(0,10);
+ if(!items.length)return null;
+ const duration=Math.max(22,items.length*7);
+ return <section className="sidebar-ad-ticker" aria-label="Sponsored tools and services">
+   <div className="sidebar-ad-ticker-head"><span>✦ SPONSORED TOOLS & OFFERS</span><small>{items.length} PROMOTIONS</small></div>
+   <div className="sidebar-ad-ticker-window">
+    <div className="sidebar-ad-ticker-track" style={{"--ticker-duration":duration+"s"}}>
+     {[...items,...items].map((p,index)=><div className="sidebar-ad-ticker-item" key={String(p.id)+"-"+index}>
+       <Promotion p={p} compact/>
+       <span className="sidebar-ad-sponsored-label">SPONSORED</span>
+     </div>)}
+    </div>
+   </div>
+   <div className="sidebar-ad-ticker-foot">Explore useful digital tools and services</div>
+ </section>;
+}
+
 function PopupPromotion({p}) {
  const [visible,setVisible]=useState(false);
  useEffect(()=>{
@@ -2349,17 +2367,8 @@ export default function App() {
 
               </div>
 
-              {/* SIDEBAR PROMOTIONS */}
-
-              {sidePromos.map(
-                p => (
-                  <Promotion
-                    key={p.id}
-                    p={p}
-                    compact
-                  />
-                )
-              )}
+              {/* LEFT SIDEBAR — CONTINUOUS VERTICAL AD TICKER */}
+              {sidePromos.length>0&&<SidebarAdTicker promotions={sidePromos.slice().sort((a,b)=>(Number(a.display_order)||0)-(Number(b.display_order)||0))}/>}
 
             </aside>
 
