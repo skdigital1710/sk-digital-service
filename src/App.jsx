@@ -2020,6 +2020,21 @@ export default function App() {
                   Apply · Download · Get Done
                 </small>
 
+                {products.find(p=>p.status==="active"&&p.show_on_home!==false) && (() => {
+                  const fp=products.find(p=>p.status==="active"&&p.show_on_home!==false);
+                  return <a className="hero-floating-product" href="/products" aria-label={"Explore "+fp.title}>
+                    <span className="hero-floating-product-art">
+                      {fp.thumbnail_path?<img src={fp.thumbnail_path} alt="" loading="lazy"/>:<WalletCards size={28}/>}
+                    </span>
+                    <span className="hero-floating-product-copy">
+                      <small>FEATURED PRODUCT</small>
+                      <b>{fp.title}</b>
+                      <em>Explore Products <ArrowRight size={12}/></em>
+                    </span>
+                    <span className="hero-floating-product-spark">✦</span>
+                  </a>;
+                })()}
+
               </div>
 
               <div>
