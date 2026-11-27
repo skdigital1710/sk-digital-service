@@ -348,49 +348,6 @@ function Promotion({ p, compact = false }) {
   );
 }
 
-function SidebarAdTicker({promotions=[]}) {
- const items=promotions.slice(0,10);
- if(!items.length)return null;
- const duration=Math.max(22,items.length*7);
- return <section className="sidebar-ad-ticker" aria-label="Sponsored tools and services">
-   <div className="sidebar-ad-ticker-head"><span>✦ SPONSORED TOOLS & OFFERS</span><small>{items.length} PROMOTIONS</small></div>
-   <div className="sidebar-ad-ticker-window">
-    <div className="sidebar-ad-ticker-track" style={{"--ticker-duration":duration+"s"}}>
-     {[...items,...items].map((p,index)=><div className="sidebar-ad-ticker-item" key={String(p.id)+"-"+index}>
-       <Promotion p={p} compact/>
-       <span className="sidebar-ad-sponsored-label">SPONSORED</span>
-     </div>)}
-    </div>
-   </div>
-   <div className="sidebar-ad-ticker-foot">Explore useful digital tools and services</div>
- </section>;
-}
-
-function PopupPromotion({p}) {
- const [visible,setVisible]=useState(false);
- useEffect(()=>{
-   if(!p?.id)return;
-   const key="sk_ad_popup_"+p.id;
-   try {
-     const last=Number(localStorage.getItem(key)||0);
-     if(Date.now()-last>=24*60*60*1000) setVisible(true);
-   } catch { setVisible(true); }
- },[p?.id]);
- if(!visible||!p)return null;
- const close=()=>{
-   try{localStorage.setItem("sk_ad_popup_"+p.id,String(Date.now()))}catch{}
-   setVisible(false);
- };
- const href=safeUrl(p.button_url);
- return <div className="sk-ad-popup-backdrop" role="dialog" aria-modal="true" aria-label={p.title||"Sponsored advertisement"} onClick={close}>
-   <div className="sk-ad-popup" onClick={e=>e.stopPropagation()}>
-     <button className="sk-ad-popup-close" onClick={close} aria-label="Close advertisement">×</button>
-     {p.image_url&&<img src={p.image_url} alt={p.title||"Sponsored promotion"}/>}
-     <div className="sk-ad-popup-copy"><span>SPONSORED</span><h2>{p.title}</h2>{p.description&&<p>{p.description}</p>}{href&&<a href={href} target="_blank" rel="noopener noreferrer" onClick={close}>{p.button_text||"Know More"} <ArrowRight size={16}/></a>}</div>
-   </div>
- </div>;
-}
-
 /* =========================================================
    FEATURED PRODUCTS
    ========================================================= */
@@ -1769,9 +1726,7 @@ export default function App() {
     (!p.end_at || new Date(p.end_at).getTime() >= now)
   );
   const topPromos = scheduledPromotions.filter(p => p.placement === "top" || p.placement === "latest_jobs");
-  const sidePromos = scheduledPromotions.filter(p => p.placement === "sidebar");
   const bottomPromos = scheduledPromotions.filter(p => p.placement === "bottom");
-  const popupPromo = scheduledPromotions.find(p => p.placement === "popup");
 
   const openJob = r => {
 
@@ -1818,6 +1773,7 @@ export default function App() {
 
     if (r) {
       return (
+        <GlobalAdShell promotions={scheduledPromotions} settings={settings} pageKey={route}>
         <JobDetail
           r={r}
           resources={resources}
@@ -1832,12 +1788,13 @@ export default function App() {
           }}
           wa={wa}
         />
+        </GlobalAdShell>
       );
     }
   }
 
   if (route === "/products") {
-    return <AllProductsPage products={products} onBack={(event) => { if (event && event.preventDefault) event.preventDefault(); history.pushState({}, "", "/"); setRoute("/"); window.scrollTo(0, 0); }} />;
+    return <GlobalAdShell promotions={scheduledPromotions} settings={settings} pageKey={route}><AllProductsPage products={products} onBack={(event) => { if (event && event.preventDefault) event.preventDefault(); history.pushState({}, "", "/"); setRoute("/"); window.scrollTo(0, 0); }} /></GlobalAdShell>;
   }
 
   /* =======================================================
@@ -1845,6 +1802,7 @@ export default function App() {
      ======================================================= */
 
   return (
+    <GlobalAdShell promotions={scheduledPromotions} settings={settings} pageKey={route}>
     <SocialFollowGate
       instagramUrl={ig}
       youtubeUrl={yt}
@@ -1868,7 +1826,6 @@ export default function App() {
             )
           }
         />
-        <PopupPromotion p={popupPromo}/>
 
         <main>
 
@@ -2368,7 +2325,6 @@ export default function App() {
               </div>
 
               {/* LEFT SIDEBAR — CONTINUOUS VERTICAL AD TICKER */}
-              {sidePromos.length>0&&<SidebarAdTicker promotions={sidePromos.slice().sort((a,b)=>(Number(a.display_order)||0)-(Number(b.display_order)||0))}/>}
 
             </aside>
 
@@ -2594,5 +2550,6 @@ export default function App() {
       </div>
 
     </SocialFollowGate>
+    </GlobalAdShell>
   );
 }
